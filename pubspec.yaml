@@ -1,0 +1,17 @@
+name: coupons_backend
+description: An asta_coupons backend
+version: 0.0.1
+author: Daniel Negi <dnegi@asta.uni-paderborn.de>
+
+environment:
+  sdk: ">=2.0.0 <3.0.0"
+
+dependencies:
+  aqueduct: ^4.0.0-b1 
+
+dev_dependencies:
+  test: ^1.0.0
+  aqueduct_test: ^2.0.0-b1 
+
+dependency_overrides:
+  postgres: 2.1.1

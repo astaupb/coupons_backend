@@ -1,0 +1,6 @@
+database:
+  host: localhost
+  port: 5432
+  username: asta_coupon_user
+  password: test_password
+  databaseName: asta_coupon
