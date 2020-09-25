@@ -1,4 +1,6 @@
 //import 'package:aqueduct/managed_auth.dart';
+import 'package:coupons_backend/controller/coupon_code_controller.dart';
+import 'package:coupons_backend/controller/store_controller.dart';
 import 'package:coupons_backend/coupons_backend.dart';
 import 'package:coupons_backend/controller/vendor_controller.dart';
 import 'package:coupons_backend/controller/coupon_controller.dart';
@@ -11,6 +13,9 @@ class CouponsBackendChannel extends ApplicationChannel {
   Future prepare() async {
     logger.onRecord.listen(
         (rec) => print("$rec ${rec.error ?? ""} ${rec.stackTrace ?? ""}"));
+
+    // In Production set to false!
+    Controller.includeErrorDetailsInServerErrorResponses = true;
 
     final config = CouponConfig(options.configurationFilePath);
     final dataModel = ManagedDataModel.fromCurrentMirrorSystem();
@@ -31,11 +36,20 @@ class CouponsBackendChannel extends ApplicationChannel {
   Controller get entryPoint {
     final router = Router();
 
-    router.route('/vendor/[:id]').link(() => VendorController(context));
+    router.route('/vendor[/:id]').link(() => VendorController(context));
 
     router
         .route('/vendor/:vendorID/coupon/[:id]')
         .link(() => CouponController(context));
+
+    router
+        .route('/vendor/:vendorID/coupon/:couponID/code')
+        .link(() => CouponCodeController(context));
+
+    router
+        .route('/vendor/:vendorID/store/[:id]')
+        .link(() => StoreController(context));
+
 
     return router;
   }

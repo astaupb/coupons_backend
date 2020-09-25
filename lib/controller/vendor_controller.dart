@@ -1,5 +1,6 @@
 import 'package:aqueduct/aqueduct.dart';
 import 'package:coupons_backend/coupons_backend.dart';
+import 'package:coupons_backend/model/access_meta_data.dart';
 import 'package:coupons_backend/model/vendor.dart';
 
 class VendorController extends ResourceController {
@@ -33,14 +34,24 @@ class VendorController extends ResourceController {
     if (request.body.isEmpty) {
       return Response.badRequest();
     }
-    final vendor = Vendor()..read(await request.body.decode(), ignore: ['id']);
+    final vendor = Vendor()
+      ..read(await request.body.decode(), ignore: ['id']);
     if (vendor.name == null) {
       return Response.badRequest();
     }
-    final query = Query<Vendor>(context)..values = vendor;
 
-    final insertedVendor = await query.insert();
+    final vendorQuery = Query<Vendor>(context)..values = vendor;
 
-    return Response.ok(insertedVendor);
+    final insertedVendor = await vendorQuery.insert();
+
+    final accessMetaDataVendorQuery = Query<AccessMetaDataVendor>(context)
+      ..values.changedAt = DateTime.now().toUtc()
+      ..values.createdAt = DateTime.now().toUtc()
+      ..values.vendor = insertedVendor;
+
+    final insertedAccessMetaDataVendorQuery =
+        await accessMetaDataVendorQuery.insert();
+
+    return Response.ok([insertedVendor, insertedAccessMetaDataVendorQuery]);
   }
 }

@@ -21,6 +21,21 @@ class CouponController extends ResourceController {
     return Response.ok(coupons);
   }
 
+  @Operation.get('vendorID', 'id')
+  Future<Response> getCouponByIDByVendorID(
+      @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
+    final couponQuery = Query<Coupon>(context);
+    couponQuery
+      ..where((c) => c.vendor.id).equalTo(vendorID)
+      ..where((c) => c.id).equalTo(id);
+    final coupon = await couponQuery.fetchOne();
+    if (coupon == null) {
+      return Response.notFound();
+    }
+
+    return Response.ok(coupon);
+  }
+
   @Operation.post('vendorID')
   Future<Response> insertCouponByVendorID(
       @Bind.path('vendorID') int vendorID) async {
@@ -31,14 +46,22 @@ class CouponController extends ResourceController {
       ..where((v) => v.id).equalTo(vendorID);
 
     final vendor = await vendorQuery.fetchOne();
+    if (vendor == null) {
+      return Response.badRequest();
+    }
     final coupon = Coupon()
-      ..read(await request.body.decode(), ignore: ['id', 'vendor'])
+      ..read(await request.body.decode(), ignore: [
+        'id',
+        'vendor'
+        ])
       ..vendor = vendor;
 
     final query = Query<Coupon>(context)..values = coupon;
 
     final insertedCoupon = await query.insert();
-
+    if (insertedCoupon == null) {
+      return Response.badRequest();
+    }
     return Response.ok(insertedCoupon);
   }
 }

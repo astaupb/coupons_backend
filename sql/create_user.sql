@@ -1,0 +1,1 @@
+CREATE USER asta_coupon_user WITH PASSWORD 'test_password';
