@@ -1,20 +1,10 @@
-import 'package:coupons_backend/coupons_backend.dart';
-import 'package:coupons_backend/model/access_meta_data.dart';
-import 'package:coupons_backend/model/coupon.dart';
+import '../coupons_backend.dart';
+import 'metadata.dart';
+import '../model/coupon.dart';
+import '../model/user.dart';
 
-class CouponCode extends ManagedObject<_CouponCode> implements _CouponCode {
-  @override
-  void willInsert() {
-    accessMetaDataCouponCode.changedAt =
-        accessMetaDataCouponCode.createdAt = DateTime.now().toUtc();
-    accessMetaDataCouponCode.redeemedAt = DateTime(1700);
-  }
 
-  @override
-  void willUpdate() {
-    accessMetaDataCouponCode.changedAt = DateTime.now().toUtc();
-  }
-}
+class CouponCode extends ManagedObject<_CouponCode> implements _CouponCode {}
 
 class _CouponCode {
   @primaryKey
@@ -22,8 +12,26 @@ class _CouponCode {
 
   String code;
 
+  @Column(defaultValue: "false")
+  bool redeemed;
+
+  ManagedSet<RedeemedCouponCode> redeemedCouponCode;
   @Relate(#codes, onDelete: DeleteRule.cascade)
   Coupon coupon;
 
-  AccessMetaDataCouponCode accessMetaDataCouponCode;
+  MetadataCouponCode accessMetaDataCouponCode;
+}
+
+class RedeemedCouponCode extends ManagedObject<_RedeemedCouponCode>
+ implements _RedeemedCouponCode {}
+
+class _RedeemedCouponCode {
+  @primaryKey
+  int id;
+
+  @Relate(#redeemedCouponCode)
+  CouponCode couponCode;
+
+  @Relate(#redeemedCouponCode)
+  User user;
 }

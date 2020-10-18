@@ -1,20 +1,19 @@
 import 'package:coupons_backend/coupons_backend.dart';
-import 'package:coupons_backend/model/vendor.dart';
-import 'package:coupons_backend/model/coupon_code.dart';
-import 'package:coupons_backend/model/access_meta_data.dart';
+import 'metadata.dart';
+import '../model/coupon_code.dart';
+import '../model/vendor.dart';
 
-class Coupon extends ManagedObject<_Coupon> implements _Coupon {
-  @override
-  void willInsert() {
-    accessMetaDataCoupon = AccessMetaDataCoupon();
-    
-  }
-
-  @override
-  void willUpdate() {
-    accessMetaDataCoupon.changedAt = DateTime.now().toUtc();
-  }
+enum RestrictionLevel {
+  // Restriction level describes how often a coupon can be used by each user
+  //  "permanent": coupon can be used by each user over and over again
+  //  "eachuser": each user can use this couponcode once
+  //  "oneuser": one user can use this couponcode once
+  permanent,
+  eachuser,
+  oneuser
 }
+
+class Coupon extends ManagedObject<_Coupon> implements _Coupon {}
 
 class _Coupon {
   @primaryKey
@@ -22,13 +21,15 @@ class _Coupon {
 
   String title;
 
+  RestrictionLevel restrictionLevel;
+
   @Column(nullable: true)
-  String description;
+  Document properties;
 
   @Relate(#coupons, onDelete: DeleteRule.cascade)
   Vendor vendor;
 
   ManagedSet<CouponCode> codes;
 
-  AccessMetaDataCoupon accessMetaDataCoupon;
+  MetadataCoupon accessMetaDataCoupon;
 }

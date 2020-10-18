@@ -1,14 +1,15 @@
 import 'package:aqueduct/aqueduct.dart';
-import 'package:coupons_backend/coupons_backend.dart';
-import 'package:coupons_backend/model/access_meta_data.dart';
-import 'package:coupons_backend/model/vendor.dart';
-import 'package:coupons_backend/model/store.dart';
+import '../coupons_backend.dart';
+import '../model/metadata.dart';
+import '../model/store.dart';
+import '../model/vendor.dart';
 
 class StoreController extends ResourceController {
   StoreController(this.context);
 
   final ManagedContext context;
 
+  @Scope([ 'user'])
   @Operation.get('vendorID')
   Future<Response> getAllStoresByVendorID(@Bind.path('vendorID') int vendorid,
       {@Bind.query('name') String name}) async {
@@ -24,6 +25,7 @@ class StoreController extends ResourceController {
     return Response.ok(store);
   }
 
+  @Scope(['user'])
   @Operation.get('vendorID', 'id')
   Future<Response> getStoresByIDByVendorID(
       @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
@@ -37,7 +39,8 @@ class StoreController extends ResourceController {
     }
     return Response.ok(store);
   }
-
+  
+  @Scope(['admin'])
   @Operation.post('vendorID')
   Future<Response> postStoreByVendorID(
       @Bind.path('vendorID') int vendorID) async {
@@ -63,10 +66,10 @@ class StoreController extends ResourceController {
     final query = Query<Store>(context)..values = store;
 
     final insertedStore = await query.insert();
-
+    final now = DateTime.now().toUtc();
     final accessMetaDataStore = Query<AccessMetaDataStore>(context)
-      ..values.changedAt = DateTime.now().toUtc()
-      ..values.createdAt = DateTime.now().toUtc()
+      ..values.changedAt = now
+      ..values.createdAt = now
       ..values.store = insertedStore;
 
     final insertedAccesMetaDataStore = accessMetaDataStore.insert();
@@ -76,5 +79,26 @@ class StoreController extends ResourceController {
     }
 
     return Response.ok(insertedStore);
+  }
+
+  @override
+  APIRequestBody documentOperationRequestBody(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == "POST") {
+      return APIRequestBody.schema(context.schema['Store']);
+    }
+    return null;
+  }
+
+  @override
+  Map<String, APIResponse> documentOperationResponses(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == 'GET') {
+      return {"200": APIResponse.schema("Get store", context.schema['Store'])};
+    } else if (operation.method == 'POST') {
+      return {"200": APIResponse.schema("Post store", context.schema['Store'])};
+    }
+
+    return {"400": APIResponse("Unknown error")};
   }
 }

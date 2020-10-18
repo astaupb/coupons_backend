@@ -1,16 +1,18 @@
 import 'package:aqueduct/aqueduct.dart';
-import 'package:coupons_backend/coupons_backend.dart';
-import 'package:coupons_backend/model/coupon.dart';
-import 'package:coupons_backend/model/vendor.dart';
+import '../coupons_backend.dart';
+import '../model/metadata.dart';
+import '../model/coupon.dart';
+import '../model/vendor.dart';
 
 class CouponController extends ResourceController {
   CouponController(this.context);
 
   final ManagedContext context;
 
+  @Scope(['user'])
   @Operation.get('vendorID')
   Future<Response> getAllCouponByVendorID(
-      @Bind.path('vendorID') int vendorID) async {
+      @requiredBinding @Bind.path('vendorID') int vendorID) async {
     final couponQuery = Query<Coupon>(context);
     couponQuery.where((c) => c.vendor.id).equalTo(vendorID);
     final coupons = await couponQuery.fetch();
@@ -21,6 +23,7 @@ class CouponController extends ResourceController {
     return Response.ok(coupons);
   }
 
+  @Scope(['user'])
   @Operation.get('vendorID', 'id')
   Future<Response> getCouponByIDByVendorID(
       @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
@@ -35,13 +38,17 @@ class CouponController extends ResourceController {
 
     return Response.ok(coupon);
   }
-
+  
+  @Scope(['admin'])
   @Operation.post('vendorID')
   Future<Response> insertCouponByVendorID(
       @Bind.path('vendorID') int vendorID) async {
     if (request.body.isEmpty) {
       return Response.badRequest();
     }
+
+    final now = DateTime.now();
+
     final vendorQuery = Query<Vendor>(context)
       ..where((v) => v.id).equalTo(vendorID);
 
@@ -50,18 +57,50 @@ class CouponController extends ResourceController {
       return Response.badRequest();
     }
     final coupon = Coupon()
-      ..read(await request.body.decode(), ignore: [
-        'id',
-        'vendor'
-        ])
+      ..read(await request.body.decode(), ignore: ['id', 'vendor'])
       ..vendor = vendor;
 
     final query = Query<Coupon>(context)..values = coupon;
 
     final insertedCoupon = await query.insert();
     if (insertedCoupon == null) {
-      return Response.badRequest();
+      return Response.serverError();
     }
+    final metadata = Query<MetadataCoupon>(context)
+      ..values.changedAt = now
+      ..values.createdAt = now
+      ..values.coupon = insertedCoupon;
+
+    final insertedMetadata = metadata.insert();
+    if (insertedMetadata == null) {
+      return Response.serverError();
+    }
+
     return Response.ok(insertedCoupon);
+  }
+
+  @override
+  APIRequestBody documentOperationRequestBody(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == "POST") {
+      return APIRequestBody.schema(context.schema['Coupon']);
+    }
+    return null;
+  }
+
+  @override
+  Map<String, APIResponse> documentOperationResponses(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == "GET") {
+      return {
+        "200": APIResponse.schema("Get coupon", context.schema["Coupon"])
+      };
+    } else if (operation.method == "POST") {
+      return {
+        "200": APIResponse.schema("Add a coupon", context.schema["Coupon"])
+      };
+    }
+
+    return {"400": APIResponse("Unknown error")};
   }
 }

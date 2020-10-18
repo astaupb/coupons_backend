@@ -14,4 +14,4 @@ Dart_Packages.xml
 *.aqueduct.pid
 client.html
 config.yaml
-
+migrations/*
