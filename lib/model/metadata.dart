@@ -9,32 +9,29 @@ class MetadataCouponCode extends ManagedObject<_MetadataCouponCode>
     implements _MetadataCouponCode {}
 
 class _MetadataCouponCode extends _Metadata {
-  @Relate(#accessMetaDataCouponCode, onDelete: DeleteRule.cascade)
+  @Relate(#metadataCouponCode, onDelete: DeleteRule.cascade)
   CouponCode couponCode;
-
-  @Column(indexed: true, nullable: true)
-  DateTime redeemedAt;
 }
 
 class MetadataCoupon extends ManagedObject<_MetadataCoupon>
     implements _MetadataCoupon {}
 
 class _MetadataCoupon extends _Metadata {
-  @Relate(#accessMetaDataCoupon, onDelete: DeleteRule.cascade)
+  @Relate(#metadataCoupon, onDelete: DeleteRule.cascade)
   Coupon coupon;
 
   @Column(indexed: true)
   DateTime startDate;
 
   @Column(indexed: true)
-  DateTime experationDate;
+  DateTime expirationDate;
 }
 
-class AccessMetaDataStore extends ManagedObject<MetadataStore>
-    implements MetadataStore {}
+class MetadataStore extends ManagedObject<StoreMetadata>
+    implements StoreMetadata {}
 
-class MetadataStore extends _Metadata {
-  @Relate(#accessMetaDataStore, onDelete: DeleteRule.cascade)
+class StoreMetadata extends _Metadata {
+  @Relate(#metadataStore, onDelete: DeleteRule.cascade)
   Store store;
 }
 
@@ -42,7 +39,7 @@ class MetadataVendor extends ManagedObject<_MetadataVendor>
     implements _MetadataVendor {}
 
 class _MetadataVendor extends _Metadata {
-  @Relate(#accessMetaDataVendor, onDelete: DeleteRule.cascade)
+  @Relate(#metadataVendor, onDelete: DeleteRule.cascade)
   Vendor vendor;
 }
 

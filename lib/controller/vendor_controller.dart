@@ -55,7 +55,10 @@ class VendorController extends ResourceController {
     final insertedAccessMetaDataVendorQuery =
         await accessMetaDataVendorQuery.insert();
 
-    return Response.ok([insertedVendor, insertedAccessMetaDataVendorQuery]);
+    if (insertedAccessMetaDataVendorQuery == null) {
+      return Response.notFound();
+    }
+    return Response.ok(insertedVendor);
   }
 
   @override

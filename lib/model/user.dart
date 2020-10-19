@@ -1,10 +1,12 @@
 import 'package:aqueduct/aqueduct.dart';
 import 'package:aqueduct/managed_auth.dart';
+
 import '../coupons_backend.dart';
 import '../model/access_codes.dart';
-import '../model/coupon_code.dart';
+import '../model/coupon.dart';
 
-enum Role { user, admin, couponUser }
+
+enum Role { user, admin, coupon }
 
 class User extends ManagedObject<_User>
     implements _User, ManagedAuthResourceOwner<_User> {
@@ -21,5 +23,5 @@ class _User extends ResourceOwnerTableDefinition {
   @Column(nullable: true)
   Document properties;
 
-  ManagedSet<RedeemedCouponCode> redeemedCouponCode;
+  ManagedSet<RedeemedCoupon> redeemedCoupon;
 }

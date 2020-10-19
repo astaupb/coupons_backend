@@ -10,12 +10,12 @@ class CouponCodeController extends ResourceController {
 
   final ManagedContext context;
 
-  @Scope(['coupon'])
+  @Scope(['user'])
   @Operation.get('vendorID', 'couponID')
   Future<Response> getCodeByCouponIDByVendorID(
       @Bind.path('vendorID') int vendorID,
       @Bind.path('couponID') int couponID) async {
-    final userID = request.authorization.ownerID.toString();
+    final userID = request.authorization.ownerID;
 
     final couponRestrictionLevelQuery = Query<Coupon>(context)
       ..where((c) => c.id).equalTo(couponID)
@@ -23,10 +23,14 @@ class CouponCodeController extends ResourceController {
 
     final couponQuery = await couponRestrictionLevelQuery.fetchOne();
 
+    if (couponQuery == null) {
+      return Response.notFound();
+    }
+
     final couponRestrictionLevel = couponQuery.restrictionLevel;
 
     if (couponRestrictionLevel == null) {
-      return Response.notFound();
+      return Response.serverError();
     }
 
     if (couponRestrictionLevel == RestrictionLevel.permanent) {
@@ -42,96 +46,88 @@ class CouponCodeController extends ResourceController {
       }
       return Response.ok(couponCode);
     } else if (couponRestrictionLevel == RestrictionLevel.eachuser) {
+      final redeemdedCouponCheck = Query<RedeemedCoupon>(context)
+        ..where((c) => c.usedBy.id).equalTo(userID)
+        ..where((c) => c.coupon.id).equalTo(couponQuery.id);
+
+      final redeemedCoupon = await redeemdedCouponCheck.fetchOne();
+
+      if (redeemedCoupon != null) {
+        return Response.notFound();
+      }
+
       final couponCodeQuery = Query<CouponCode>(context)
         ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
         ..where((c) => c.coupon.id).equalTo(couponID)
         ..fetchLimit = 1;
 
-      final couponCode = couponCodeQuery.fetchOne();
+      final couponCode = await couponCodeQuery.fetchOne();
 
       if (couponCode == null) {
         return Response.notFound();
       }
 
+      final redeemedCouponInsertQuery = Query<RedeemedCoupon>(context)
+        ..values.coupon = couponQuery
+        ..values.usedBy.id = userID
+        ..values.redeemedAt = DateTime.now().toUtc();
+
+      final redeemedCouponInsert = await redeemedCouponInsertQuery.insert();
+
+      if (redeemedCouponInsert == null) {
+        return Response.notFound();
+      }
+      
       return Response.ok(couponCode);
+
     } else if (couponRestrictionLevel == RestrictionLevel.oneuser) {
-      final couponCodeUsedQuery = Query<CouponCode>(context)
+      final redeemdedCouponCheck = Query<RedeemedCoupon>(context)
+        ..where((c) => c.usedBy.id).equalTo(userID)
+        ..where((c) => c.coupon.id).equalTo(couponQuery.id);
+
+      final redeemedCoupon = await redeemdedCouponCheck.fetchOne();
+
+      if (redeemedCoupon != null) {
+        return Response.notFound();
+      }
+
+      final couponCodeQuery = Query<CouponCode>(context)
         ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
         ..where((c) => c.coupon.id).equalTo(couponID)
-        ..where((c) => c.redeemedCouponCode).contains(userID)
+        ..where((c) => c.redeemed).equalTo(false)
         ..fetchLimit = 1;
 
-      final couponCodeUsed = couponCodeUsedQuery.fetchOne();
+      final couponCode = await couponCodeQuery.fetchOne();
 
-      if (couponCodeUsed == null) {
-        final couponCodeQuery = Query<CouponCode>(context)
-          ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
-          ..where((c) => c.coupon.id).equalTo(couponID)
-          ..where((c) => c.redeemed).equalTo(false)
-          ..fetchLimit = 1;
-
-        final couponCode = couponCodeQuery.fetchOne();
-
-        return Response.ok(couponCode);
+      if (couponCode == null) {
+        return Response.notFound();
       }
 
-      return Response.notFound();
-    }
+      final redeemedCouponInsertQuery = Query<RedeemedCoupon>(context)
+        ..values.coupon = couponQuery
+        ..values.usedBy.id = userID
+        ..values.redeemedAt = DateTime.now().toUtc();
 
-    /*
-    final couponCodeQuery = Query<CouponCode>(context);
-    couponCodeQuery
-      ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
-      ..where((c) => c.coupon.id).equalTo(couponID)
-      ..where((c) => c.redeemed).equalTo(false)
-      ..fetchLimit = 1;
+      final redeemedCouponInsert = await redeemedCouponInsertQuery.insert();
 
-    final coupon = await couponCodeQuery.fetchOne();
-
-    if (coupon == null) {
-      return Response.notFound();
-    }
-    if (coupon.restrictionLevel == RestrictionLevel.oneuser) {
-      final userQuery = Query<User>(context)
-        ..where((u) => u.id).equalTo(request.authorization.ownerID);
-
-      final userFetch = await userQuery.fetchOne();
-
-      final redeemedCouponCodeQuery = Query<RedeemedCouponCode>(context)
-        ..values.user = userFetch
-        ..values.couponCode = coupon;
-
-      final redeemedCouponCode = await redeemedCouponCodeQuery.insert();
-
-      final updateCouponQuery = Query<CouponCode>(context)
-        ..where((c) => c.id).equalTo(coupon.id)
-        ..values.redeemed = true
-        ..values.redeemedCouponCode.add(redeemedCouponCode);
-
-      final updatedCouponQuery = await updateCouponQuery.updateOne();
-
-      if (updatedCouponQuery == null) {
-        return Response.serverError();
+      if (redeemedCouponInsert == null) {
+        return Response.notFound();
       }
-      userFetch.redeemedCouponCode.add(redeemedCouponCode);
 
-      final updatedUserQuery = Query<User>(context)..values = userFetch;
+      final couponCodeUpdateQuery = Query<CouponCode>(context)
+        ..where((c) => c.id).equalTo(couponCode.id)
+        ..values.redeemed = true;
 
-      final updatedUser = updatedUserQuery.updateOne();
+      final couponCodeUpdate = couponCodeUpdateQuery.updateOne();
 
-      if (updatedUser == null) {
+      if (couponCodeUpdate == null) {
         return Response.serverError();
       }
 
-      final metadataQuery = Query<MetadataCouponCode>(context)
-        ..values.redeemedAt = DateTime.now()
-        ..where((m) => m.couponCode.id).equalTo(couponID);
-      final updatedMetadata = await metadataQuery.updateOne();
-      if (updatedMetadata == null) {
-        return Response.badRequest();
-      }
+      return Response.ok(couponCode);
     }
-    return Response.ok(coupon);
+
+    return Response.notFound();
   }
 
   @Scope(['admin'])
@@ -156,6 +152,7 @@ class CouponCodeController extends ResourceController {
     final couponCode = CouponCode()
       ..read(await request.body.decode(), ignore: [
         'id',
+        'redeemed',
         'accessMetaDataCouponCode.redeemedAt',
         'accessMetaDataCouponCode.createdAt',
         'accessMetaDataCouponCode.changedAt',
@@ -163,8 +160,7 @@ class CouponCodeController extends ResourceController {
       ])
       ..coupon = coupon;
     final now = DateTime.now().toUtc();
-    final query = Query<CouponCode>(context);
-    query.values = couponCode;
+    final query = Query<CouponCode>(context)..values = couponCode;
     final insertedCouponCode = await query.insert();
     if (insertedCouponCode == null) {
       return Response.badRequest();
@@ -172,7 +168,6 @@ class CouponCodeController extends ResourceController {
     final metadata = Query<MetadataCouponCode>(context)
       ..values.changedAt = now
       ..values.createdAt = now
-      ..values.redeemedAt = null
       ..values.couponCode = insertedCouponCode;
 
     final insertedMetadata = await metadata.insert();
@@ -180,7 +175,6 @@ class CouponCodeController extends ResourceController {
       return Response.badRequest();
     }
     return Response.ok(insertedCouponCode);
-  */
   }
 
   @override

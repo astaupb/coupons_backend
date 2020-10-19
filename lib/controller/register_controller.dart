@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:aqueduct/aqueduct.dart';
 import 'package:coupons_backend/coupons_backend.dart';
 import 'package:uuid/uuid.dart';
+
 import '../model/access_codes.dart';
 import '../model/user.dart';
 
 class RegisterController extends ResourceController {
   RegisterController(this.context, this.authServer);
-
   final ManagedContext context;
-  final AuthServer authServer;
 
+  final AuthServer authServer;
   Uuid uuid = Uuid();
 
   @Operation.post()
   Future<Response> createUser(@Bind.body() User user) async {
-    user.username ??= uuid.v4();
-    user.password ??= uuid.v4();
+    final randomUuid = uuid.v4();
+    user.username ??= randomUuid;
+    user.password ??= randomUuid;
 
     final fetchRole = Query<AccessCode>(context)
       ..where((a) => a.code).equalTo(user.code)
@@ -25,7 +26,7 @@ class RegisterController extends ResourceController {
 
     final recivedRole = await fetchRole.fetchOne();
 
-    if (recivedRole.role == null) {
+    if (recivedRole == null) {
       return Response.notFound();
     }
 

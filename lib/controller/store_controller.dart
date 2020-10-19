@@ -9,7 +9,7 @@ class StoreController extends ResourceController {
 
   final ManagedContext context;
 
-  @Scope([ 'user'])
+  @Scope(['user'])
   @Operation.get('vendorID')
   Future<Response> getAllStoresByVendorID(@Bind.path('vendorID') int vendorid,
       {@Bind.query('name') String name}) async {
@@ -67,7 +67,7 @@ class StoreController extends ResourceController {
 
     final insertedStore = await query.insert();
     final now = DateTime.now().toUtc();
-    final accessMetaDataStore = Query<AccessMetaDataStore>(context)
+    final accessMetaDataStore = Query<MetadataStore>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.store = insertedStore;

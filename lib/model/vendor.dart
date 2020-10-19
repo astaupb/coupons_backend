@@ -1,7 +1,7 @@
 import '../coupons_backend.dart';
-import 'metadata.dart';
 import '../model/coupon.dart';
 import '../model/store.dart';
+import 'metadata.dart';
 
 class Vendor extends ManagedObject<_Vendor> implements _Vendor {}
 
@@ -19,5 +19,5 @@ class _Vendor {
 
   ManagedSet<Store> stores;
 
-  MetadataVendor accessMetaDataVendor;
+  MetadataVendor metadataVendor;
 }
