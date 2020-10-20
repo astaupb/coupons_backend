@@ -46,9 +46,9 @@ class _RedeemedCoupon {
 
   DateTime redeemedAt;
 
-  @Relate(#usedBy)
+  @Relate(#usedBy, onDelete: DeleteRule.nullify)
   Coupon coupon;
 
-  @Relate(#redeemedCoupon)
+  @Relate(#redeemedCoupon, onDelete: DeleteRule.nullify)
   User usedBy;
 }

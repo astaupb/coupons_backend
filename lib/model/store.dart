@@ -8,7 +8,7 @@ class _Store {
   @primaryKey
   int id;
 
-  @Relate(#stores)
+  @Relate(#stores, onDelete: DeleteRule.cascade)
   Vendor vendor;
 
   String name;

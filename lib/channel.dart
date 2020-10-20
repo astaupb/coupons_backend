@@ -55,7 +55,7 @@ class CouponsBackendChannel extends ApplicationChannel {
         .link(() => AccessCodeController(context));
 
     router
-        .route('/vendor[/:id]')
+        .route('/vendor/[:id]')
         .link(() => Authorizer.bearer(authServer))
         .link(() => VendorController(context));
 
@@ -65,7 +65,7 @@ class CouponsBackendChannel extends ApplicationChannel {
         .link(() => CouponController(context));
 
     router
-        .route('/vendor/:vendorID/coupon/:couponID/code')
+        .route('/vendor/:vendorID/coupon/:couponID/code/[:id]')
         .link(() => Authorizer.bearer(authServer))
         .link(() => CouponCodeController(context));
 

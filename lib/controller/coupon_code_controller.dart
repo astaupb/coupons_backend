@@ -77,9 +77,8 @@ class CouponCodeController extends ResourceController {
       if (redeemedCouponInsert == null) {
         return Response.notFound();
       }
-      
-      return Response.ok(couponCode);
 
+      return Response.ok(couponCode);
     } else if (couponRestrictionLevel == RestrictionLevel.oneuser) {
       final redeemdedCouponCheck = Query<RedeemedCoupon>(context)
         ..where((c) => c.usedBy.id).equalTo(userID)
@@ -103,24 +102,24 @@ class CouponCodeController extends ResourceController {
         return Response.notFound();
       }
 
-      final redeemedCouponInsertQuery = Query<RedeemedCoupon>(context)
+      final redeemedInsertQuery = Query<RedeemedCoupon>(context)
         ..values.coupon = couponQuery
         ..values.usedBy.id = userID
         ..values.redeemedAt = DateTime.now().toUtc();
 
-      final redeemedCouponInsert = await redeemedCouponInsertQuery.insert();
+      final redeemedInsert = await redeemedInsertQuery.insert();
 
-      if (redeemedCouponInsert == null) {
+      if (redeemedInsert == null) {
         return Response.notFound();
       }
 
-      final couponCodeUpdateQuery = Query<CouponCode>(context)
+      final updateQuery = Query<CouponCode>(context)
         ..where((c) => c.id).equalTo(couponCode.id)
         ..values.redeemed = true;
 
-      final couponCodeUpdate = couponCodeUpdateQuery.updateOne();
+      final update = updateQuery.updateOne();
 
-      if (couponCodeUpdate == null) {
+      if (update == null) {
         return Response.serverError();
       }
 
@@ -128,6 +127,61 @@ class CouponCodeController extends ResourceController {
     }
 
     return Response.notFound();
+  }
+
+  @Scope(['admin'])
+  @Operation.put('vendorID', 'couponID', 'id')
+  Future<Response> putCouponCodeByIDByCouponIDByVendorID(
+      @Bind.path('vendorID')
+          int vendorID,
+      @Bind.path('couponID')
+          int couponID,
+      @Bind.path('id')
+          int id,
+      @Bind.body(ignore: ['metadataCouponCode', 'coupon', 'id'])
+          CouponCode couponCode) async {
+    final updateQuery = Query<CouponCode>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.coupon.id).equalTo(couponID)
+      ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
+      ..values = couponCode;
+
+    final update = updateQuery.updateOne();
+
+    if (update == null) {
+      return Response.notFound();
+    }
+
+    final now = DateTime.now().toUtc();
+    final updateMetadataQuery = Query<MetadataCouponCode>(context)
+      ..where((x) => x.couponCode.id).equalTo(couponID)
+      ..values.changedAt = now;
+
+    final updateMetadata = updateMetadataQuery.updateOne();
+    if (updateMetadata == null) {
+      return Response.serverError();
+    }
+    return Response.ok(update);
+  }
+
+  @Scope(['admin'])
+  @Operation.delete('vendorID', 'couponID', 'id')
+  Future<Response> deleteCouponCodeByIDByCoupon(
+      @Bind.path('vendorID') int vendorID,
+      @Bind.path('couponID') int couponID,
+      @Bind.path('id') int id) async {
+    final deleteQuery = Query<CouponCode>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.coupon.id).equalTo(couponID)
+      ..where((c) => c.coupon.vendor.id).equalTo(vendorID);
+
+    final delete = deleteQuery.delete();
+
+    if (delete == null) {
+      return Response.notFound();
+    }
+
+    return Response.accepted();
   }
 
   @Scope(['admin'])
@@ -201,7 +255,6 @@ class CouponCodeController extends ResourceController {
             APIResponse.schema("Add a couponcode", context.schema["CouponCode"])
       };
     }
-
     return {"400": APIResponse("Unkown error")};
   }
 }
