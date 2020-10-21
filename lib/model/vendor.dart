@@ -19,5 +19,5 @@ class _Vendor {
 
   ManagedSet<Store> stores;
 
-  MetadataVendor metadataVendor;
+  VendorMetadata vendorMetadata;
 }

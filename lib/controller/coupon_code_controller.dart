@@ -1,14 +1,61 @@
 import 'package:aqueduct/aqueduct.dart';
+
 import '../coupons_backend.dart';
 import '../model/coupon.dart';
 import '../model/coupon_code.dart';
 import '../model/metadata.dart';
-import '../model/user.dart';
 
 class CouponCodeController extends ResourceController {
   CouponCodeController(this.context);
 
   final ManagedContext context;
+
+  @Scope(['admin'])
+  @Operation.delete('vendorID', 'couponID', 'id')
+  Future<Response> deleteCouponCodeByIDByCoupon(
+      @Bind.path('vendorID') int vendorID,
+      @Bind.path('couponID') int couponID,
+      @Bind.path('id') int id) async {
+    final deleteQuery = Query<CouponCode>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.coupon.id).equalTo(couponID)
+      ..where((c) => c.coupon.vendor.id).equalTo(vendorID);
+
+    final delete = deleteQuery.delete();
+
+    if (delete == null) {
+      return Response.notFound();
+    }
+
+    return Response.accepted();
+  }
+
+  @override
+  APIRequestBody documentOperationRequestBody(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == "POST") {
+      return APIRequestBody.schema(context.schema['CouponCode']);
+    }
+    return null;
+  }
+
+  @override
+  Map<String, APIResponse> documentOperationResponses(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == "GET") {
+      return {
+        "200": APIResponse.schema(
+            "Get a coupon code", context.schema["CouponCode"]),
+        "404": APIResponse("Could not find any redeemable couponcode!")
+      };
+    } else if (operation.method == "POST") {
+      return {
+        "200":
+            APIResponse.schema("Add a couponcode", context.schema["CouponCode"])
+      };
+    }
+    return {"400": APIResponse("Unkown error")};
+  }
 
   @Scope(['user'])
   @Operation.get('vendorID', 'couponID')
@@ -122,66 +169,9 @@ class CouponCodeController extends ResourceController {
       if (update == null) {
         return Response.serverError();
       }
-
       return Response.ok(couponCode);
     }
-
     return Response.notFound();
-  }
-
-  @Scope(['admin'])
-  @Operation.put('vendorID', 'couponID', 'id')
-  Future<Response> putCouponCodeByIDByCouponIDByVendorID(
-      @Bind.path('vendorID')
-          int vendorID,
-      @Bind.path('couponID')
-          int couponID,
-      @Bind.path('id')
-          int id,
-      @Bind.body(ignore: ['metadataCouponCode', 'coupon', 'id'])
-          CouponCode couponCode) async {
-    final updateQuery = Query<CouponCode>(context)
-      ..where((c) => c.id).equalTo(id)
-      ..where((c) => c.coupon.id).equalTo(couponID)
-      ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
-      ..values = couponCode;
-
-    final update = updateQuery.updateOne();
-
-    if (update == null) {
-      return Response.notFound();
-    }
-
-    final now = DateTime.now().toUtc();
-    final updateMetadataQuery = Query<MetadataCouponCode>(context)
-      ..where((x) => x.couponCode.id).equalTo(couponID)
-      ..values.changedAt = now;
-
-    final updateMetadata = updateMetadataQuery.updateOne();
-    if (updateMetadata == null) {
-      return Response.serverError();
-    }
-    return Response.ok(update);
-  }
-
-  @Scope(['admin'])
-  @Operation.delete('vendorID', 'couponID', 'id')
-  Future<Response> deleteCouponCodeByIDByCoupon(
-      @Bind.path('vendorID') int vendorID,
-      @Bind.path('couponID') int couponID,
-      @Bind.path('id') int id) async {
-    final deleteQuery = Query<CouponCode>(context)
-      ..where((c) => c.id).equalTo(id)
-      ..where((c) => c.coupon.id).equalTo(couponID)
-      ..where((c) => c.coupon.vendor.id).equalTo(vendorID);
-
-    final delete = deleteQuery.delete();
-
-    if (delete == null) {
-      return Response.notFound();
-    }
-
-    return Response.accepted();
   }
 
   @Scope(['admin'])
@@ -219,7 +209,7 @@ class CouponCodeController extends ResourceController {
     if (insertedCouponCode == null) {
       return Response.badRequest();
     }
-    final metadata = Query<MetadataCouponCode>(context)
+    final metadata = Query<CouponCodeMetadata>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.couponCode = insertedCouponCode;
@@ -231,30 +221,38 @@ class CouponCodeController extends ResourceController {
     return Response.ok(insertedCouponCode);
   }
 
-  @override
-  APIRequestBody documentOperationRequestBody(
-      APIDocumentContext context, Operation operation) {
-    if (operation.method == "POST") {
-      return APIRequestBody.schema(context.schema['CouponCode']);
-    }
-    return null;
-  }
+  @Scope(['admin'])
+  @Operation.put('vendorID', 'couponID', 'id')
+  Future<Response> putCouponCodeByIDByCouponIDByVendorID(
+      @Bind.path('vendorID')
+          int vendorID,
+      @Bind.path('couponID')
+          int couponID,
+      @Bind.path('id')
+          int id,
+      @Bind.body(ignore: ['metadataCouponCode', 'coupon', 'id'])
+          CouponCode couponCode) async {
+    final updateQuery = Query<CouponCode>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.coupon.id).equalTo(couponID)
+      ..where((c) => c.coupon.vendor.id).equalTo(vendorID)
+      ..values = couponCode;
 
-  @override
-  Map<String, APIResponse> documentOperationResponses(
-      APIDocumentContext context, Operation operation) {
-    if (operation.method == "GET") {
-      return {
-        "200": APIResponse.schema(
-            "Get a coupon code", context.schema["CouponCode"]),
-        "404": APIResponse("Could not find any redeemable couponcode!")
-      };
-    } else if (operation.method == "POST") {
-      return {
-        "200":
-            APIResponse.schema("Add a couponcode", context.schema["CouponCode"])
-      };
+    final update = updateQuery.updateOne();
+
+    if (update == null) {
+      return Response.notFound();
     }
-    return {"400": APIResponse("Unkown error")};
+
+    final now = DateTime.now().toUtc();
+    final updateMetadataQuery = Query<CouponCodeMetadata>(context)
+      ..where((x) => x.couponCode.id).equalTo(couponID)
+      ..values.changedAt = now;
+
+    final updateMetadata = updateMetadataQuery.updateOne();
+    if (updateMetadata == null) {
+      return Response.serverError();
+    }
+    return Response.ok(update);
   }
 }

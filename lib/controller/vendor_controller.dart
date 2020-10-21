@@ -24,7 +24,6 @@ class VendorController extends ResourceController {
   @Operation.get('id')
   Future<Response> getVenodorByID(@Bind.path('id') int id) async {
     final vendorQuery = Query<Vendor>(context)..where((v) => v.id).equalTo(id);
-    vendorQuery.join(object: (x) => x.metadataVendor);
     final vendor = await vendorQuery.fetch();
     if (vendor == null) {
       return Response.notFound();
@@ -48,7 +47,7 @@ class VendorController extends ResourceController {
 
     final now = DateTime.now().toUtc();
 
-    final updateMetadataQuery = Query<MetadataVendor>(context)
+    final updateMetadataQuery = Query<VendorMetadata>(context)
       ..where((m) => m.vendor.id).equalTo(id)
       ..values.changedAt = now;
 
@@ -88,7 +87,7 @@ class VendorController extends ResourceController {
     final insertedVendor = await vendorQuery.insert();
 
     final now = DateTime.now().toUtc();
-    final accessMetaDataVendorQuery = Query<MetadataVendor>(context)
+    final accessMetaDataVendorQuery = Query<VendorMetadata>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.vendor = insertedVendor;
@@ -112,7 +111,7 @@ class VendorController extends ResourceController {
     }
     return null;
   }
-
+  
   @override
   Map<String, APIResponse> documentOperationResponses(
       APIDocumentContext context, Operation operation) {

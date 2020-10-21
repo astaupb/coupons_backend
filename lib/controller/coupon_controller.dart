@@ -1,7 +1,8 @@
 import 'package:aqueduct/aqueduct.dart';
+
 import '../coupons_backend.dart';
-import '../model/metadata.dart';
 import '../model/coupon.dart';
+import '../model/metadata.dart';
 import '../model/vendor.dart';
 
 class CouponController extends ResourceController {
@@ -19,7 +20,6 @@ class CouponController extends ResourceController {
     if (coupons == null || coupons.isEmpty) {
       return Response.notFound();
     }
-
     return Response.ok(coupons);
   }
 
@@ -27,64 +27,14 @@ class CouponController extends ResourceController {
   @Operation.get('vendorID', 'id')
   Future<Response> getCouponByIDByVendorID(
       @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
-    final couponQuery = Query<Coupon>(context);
-    couponQuery
+    final couponQuery = Query<Coupon>(context)
       ..where((c) => c.vendor.id).equalTo(vendorID)
       ..where((c) => c.id).equalTo(id);
     final coupon = await couponQuery.fetchOne();
     if (coupon == null) {
       return Response.notFound();
     }
-
     return Response.ok(coupon);
-  }
-
-  @Scope(['admin'])
-  @Operation.put('vendorID', 'id')
-  Future<Response> updateCouponByIDByVendorID(
-      @Bind.path('vendorID')
-          int vendorID,
-      @Bind.path('id')
-          int id,
-      @Bind.body(ignore: ['id', 'vendor', 'codes', 'usedBy', 'metadataCoupon'])
-          Coupon coupon) async {
-    final updateQuery = Query<Coupon>(context)
-      ..where((c) => c.id).equalTo(id)
-      ..where((c) => c.vendor.id).equalTo(vendorID)
-      ..values = coupon;
-
-    final update = await updateQuery.updateOne();
-
-    if (update == null) {
-      return Response.notFound();
-    }
-
-    final now = DateTime.now().toUtc();
-    final updateMetadata = Query<MetadataCoupon>(context)
-      ..where((x) => x.coupon.id).equalTo(id)
-      ..values.changedAt = now;
-
-    if (updateMetadata == null) {
-      return Response.serverError();
-    }
-    return Response.ok(update);
-  }
-
-  @Scope(['admin'])
-  @Operation.delete('vendorID', 'id')
-  Future<Response> deleteCouponByIDByVendorID(
-      @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
-    final deleteCouponQuery = Query<Coupon>(context)
-      ..where((c) => c.id).equalTo(id)
-      ..where((c) => c.vendor.id).equalTo(vendorID);
-
-    final deleteCoupon = await deleteCouponQuery.delete();
-
-    if (deleteCoupon == null) {
-      return Response.notFound();
-    }
-
-    return Response.accepted();
   }
 
   @Scope(['admin'])
@@ -114,7 +64,7 @@ class CouponController extends ResourceController {
     if (insertedCoupon == null) {
       return Response.serverError();
     }
-    final metadata = Query<MetadataCoupon>(context)
+    final metadata = Query<CouponMetadata>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.coupon = insertedCoupon;
@@ -123,8 +73,55 @@ class CouponController extends ResourceController {
     if (insertedMetadata == null) {
       return Response.serverError();
     }
-
     return Response.ok(insertedCoupon);
+  }
+
+  @Scope(['admin'])
+  @Operation.put('vendorID', 'id')
+  Future<Response> updateCouponByIDByVendorID(
+      @Bind.path('vendorID')
+          int vendorID,
+      @Bind.path('id')
+          int id,
+      @Bind.body(ignore: ['id', 'vendor', 'codes', 'usedBy', 'metadataCoupon'])
+          Coupon coupon) async {
+    final updateQuery = Query<Coupon>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.vendor.id).equalTo(vendorID)
+      ..values = coupon;
+
+    final update = await updateQuery.updateOne();
+
+    if (update == null) {
+      return Response.notFound();
+    }
+
+    final now = DateTime.now().toUtc();
+    final updateMetadata = Query<CouponMetadata>(context)
+      ..where((x) => x.coupon.id).equalTo(id)
+      ..values.changedAt = now;
+
+    if (updateMetadata == null) {
+      return Response.serverError();
+    }
+    return Response.ok(update);
+  }
+
+  @Scope(['admin'])
+  @Operation.delete('vendorID', 'id')
+  Future<Response> deleteCouponByIDByVendorID(
+      @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
+    final deleteCouponQuery = Query<Coupon>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.vendor.id).equalTo(vendorID);
+
+    final deleteCoupon = await deleteCouponQuery.delete();
+
+    if (deleteCoupon == null) {
+      return Response.notFound();
+    }
+
+    return Response.accepted();
   }
 
   @override
@@ -132,8 +129,9 @@ class CouponController extends ResourceController {
       APIDocumentContext context, Operation operation) {
     if (operation.method == "POST" || operation.method == "PUT") {
       return APIRequestBody.schema(context.schema['Coupon']);
+    } else {
+      return null;
     }
-    return null;
   }
 
   @override

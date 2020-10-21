@@ -16,5 +16,5 @@ class _Store {
   @Column(nullable: true)
   Document properties;
 
-  MetadataStore metadataStore;
+  StoreMetadata storeMetadata;
 }

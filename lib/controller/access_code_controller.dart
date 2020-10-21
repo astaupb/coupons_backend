@@ -26,6 +26,23 @@ class AccessCodeController extends ResourceController {
   }
 
   @Scope(['admin'])
+  @Operation.put('id')
+  Future<Response> updateAccesscode(@Bind.path('id') int id,
+      @Bind.body(ignore: ['id', 'code']) AccessCode accesscode) async {
+    final updateQuery = Query<AccessCode>(context)
+      ..where((v) => v.id).equalTo(id)
+      ..values = accesscode;
+
+    final update = updateQuery.updateOne();
+
+    if (update == null) {
+      return Response.notFound();
+    }
+
+    return Response.ok(update);
+  }
+
+  @Scope(['admin'])
   @Operation.post()
   Future<Response> postAccessCode() async {
     final accessCodePost = Query<AccessCode>(context);

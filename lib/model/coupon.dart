@@ -30,11 +30,17 @@ class _Coupon {
   @Relate(#coupons, onDelete: DeleteRule.cascade)
   Vendor vendor;
 
+  @Column(indexed: true)
+  DateTime startDate;
+
+  @Column(indexed: true)
+  DateTime expirationDate;
+
   ManagedSet<RedeemedCoupon> usedBy;
 
   ManagedSet<CouponCode> codes;
 
-  MetadataCoupon metadataCoupon;
+  CouponMetadata couponMetadata;
 }
 
 class RedeemedCoupon extends ManagedObject<_RedeemedCoupon>

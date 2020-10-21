@@ -16,5 +16,5 @@ class _CouponCode {
   @Relate(#codes, onDelete: DeleteRule.cascade)
   Coupon coupon;
 
-  MetadataCouponCode metadataCouponCode;
+  CouponCodeMetadata couponCodeMetadata;
 }

@@ -13,8 +13,8 @@ class StoreController extends ResourceController {
   @Operation.get('vendorID')
   Future<Response> getAllStoresByVendorID(@Bind.path('vendorID') int vendorid,
       {@Bind.query('name') String name}) async {
-    final storeQuery = Query<Store>(context);
-    storeQuery.where((s) => s.vendor.id).equalTo(vendorid);
+    final storeQuery = Query<Store>(context)
+      ..where((s) => s.vendor.id).equalTo(vendorid);
     if (name != null) {
       storeQuery.where((s) => s.name).contains(name, caseSensitive: false);
     }
@@ -29,11 +29,11 @@ class StoreController extends ResourceController {
   @Operation.get('vendorID', 'id')
   Future<Response> getStoresByIDByVendorID(
       @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
-    final storeQuery = Query<Store>(context);
-    storeQuery
+    final query = Query<Store>(context)
       ..where((s) => s.vendor.id).equalTo(vendorID)
       ..where((s) => s.id).equalTo(id);
-    final store = await storeQuery.fetch();
+
+    final store = await query.fetch();
     if (store == null) {
       return Response.notFound();
     }
@@ -48,18 +48,18 @@ class StoreController extends ResourceController {
       @Bind.body(ignore: ['id', 'metadataStore', 'vendor']) Store store) async {
     final now = DateTime.now().toUtc();
 
-    final updateQuery = Query<Store>(context)
+    final query = Query<Store>(context)
       ..values = store
       ..where((x) => x.id).equalTo(id)
       ..where((x) => x.vendor.id).equalTo(vendorID);
 
-    final updateStore = await updateQuery.updateOne();
+    final updateStore = await query.updateOne();
 
     if (updateStore == null) {
       return Response.notFound();
     }
 
-    final updateMetadataQuery = Query<MetadataStore>(context)
+    final updateMetadataQuery = Query<StoreMetadata>(context)
       ..where((x) => x.store.id).equalTo(id)
       ..values.changedAt = now;
 
@@ -116,7 +116,7 @@ class StoreController extends ResourceController {
 
     final insertedStore = await query.insert();
     final now = DateTime.now().toUtc();
-    final accessMetaDataStore = Query<MetadataStore>(context)
+    final accessMetaDataStore = Query<StoreMetadata>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.store = insertedStore;
@@ -133,12 +133,11 @@ class StoreController extends ResourceController {
   @override
   APIRequestBody documentOperationRequestBody(
       APIDocumentContext context, Operation operation) {
-    if (operation.method == "POST") {
+    if (operation.method == 'POST' || operation.method == 'POST') {
       return APIRequestBody.schema(context.schema['Store']);
-    } else if (operation.method == 'PUT') {
-      return APIRequestBody.schema(context.schema['Store']);
+    } else {
+      return null;
     }
-    return null;
   }
 
   @override
