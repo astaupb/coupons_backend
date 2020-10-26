@@ -14,12 +14,17 @@ class CouponController extends ResourceController {
   @Operation.get('vendorID')
   Future<Response> getAllCouponByVendorID(
       @requiredBinding @Bind.path('vendorID') int vendorID) async {
-    final couponQuery = Query<Coupon>(context);
-    couponQuery.where((c) => c.vendor.id).equalTo(vendorID);
-    final coupons = await couponQuery.fetch();
+    final userID = request.authorization.ownerID;
+    final query = Query<Coupon>(context)
+      ..where((c) => c.vendor.id).equalTo(vendorID);
+    query.join(set: (x) => x.usedBy)
+      ..where((x) => x.usedBy.id).equalTo(userID)
+      ..returningProperties((x) => [x.usedBy]);
+    final coupons = await query.fetch();
     if (coupons == null || coupons.isEmpty) {
       return Response.notFound();
     }
+
     return Response.ok(coupons);
   }
 
