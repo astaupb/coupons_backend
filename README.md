@@ -23,6 +23,8 @@ aqueduct db upgrade --connect postgres://asta_coupon_user:test_password@localhos
 
 Database credentials should be placed inside config.yaml
 
+Standard keys to be used in data for the properties columns (of for example vendor table) are documented in properties.md
+
 ## Running the Application Locally
 
 Run `aqueduct serve` from this directory to run the application. For running within an IDE, run `bin/main.dart`. By default, a configuration file named `config.yaml` will be used.

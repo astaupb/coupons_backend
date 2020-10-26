@@ -1,7 +1,8 @@
-import 'package:coupons_backend/coupons_backend.dart';
-import 'metadata.dart';
+import '../coupons_backend.dart';
 import '../model/coupon_code.dart';
+import '../model/user.dart';
 import '../model/vendor.dart';
+import 'metadata.dart';
 
 enum RestrictionLevel {
   // Restriction level describes how often a coupon can be used by each user
@@ -29,7 +30,31 @@ class _Coupon {
   @Relate(#coupons, onDelete: DeleteRule.cascade)
   Vendor vendor;
 
+  @Column(indexed: true)
+  DateTime startDate;
+
+  @Column(indexed: true)
+  DateTime expirationDate;
+
+  ManagedSet<RedeemedCoupon> usedBy;
+
   ManagedSet<CouponCode> codes;
 
-  MetadataCoupon accessMetaDataCoupon;
+  CouponMetadata couponMetadata;
+}
+
+class RedeemedCoupon extends ManagedObject<_RedeemedCoupon>
+    implements _RedeemedCoupon {}
+
+class _RedeemedCoupon {
+  @primaryKey
+  int id;
+
+  DateTime redeemedAt;
+
+  @Relate(#usedBy, onDelete: DeleteRule.nullify)
+  Coupon coupon;
+
+  @Relate(#redeemedCoupon, onDelete: DeleteRule.nullify)
+  User usedBy;
 }

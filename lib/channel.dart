@@ -1,5 +1,7 @@
 import 'package:aqueduct/managed_auth.dart';
+import 'package:coupons_backend/controller/access_code_controller.dart';
 import 'package:coupons_backend/model/access_codes.dart';
+import 'controller/access_code_controller.dart';
 import 'controller/coupon_code_controller.dart';
 import 'controller/coupon_controller.dart';
 import 'controller/register_controller.dart';
@@ -48,12 +50,12 @@ class CouponsBackendChannel extends ApplicationChannel {
         .link(() => RegisterController(context, authServer));
 
     router
-        .route('/codes[/:id]')
-        .link(() => Authorizer.bearer(authServer, scopes: ['admin']))
-        .link(() => ManagedObjectController<AccessCode>(context));
+        .route('/codes')
+        .link(() => Authorizer.bearer(authServer))
+        .link(() => AccessCodeController(context));
 
     router
-        .route('/vendor[/:id]')
+        .route('/vendor/[:id]')
         .link(() => Authorizer.bearer(authServer))
         .link(() => VendorController(context));
 
@@ -63,7 +65,7 @@ class CouponsBackendChannel extends ApplicationChannel {
         .link(() => CouponController(context));
 
     router
-        .route('/vendor/:vendorID/coupon/:couponID/code')
+        .route('/vendor/:vendorID/coupon/:couponID/code/[:id]')
         .link(() => Authorizer.bearer(authServer))
         .link(() => CouponCodeController(context));
 
@@ -88,27 +90,27 @@ class CouponConfig extends Configuration {
 }
 
 class RoleBasedAuthDelegate extends ManagedAuthDelegate<User> {
-  RoleBasedAuthDelegate(ManagedContext context, {int tokenLimit: 4})
+  RoleBasedAuthDelegate(ManagedContext context, {int tokenLimit = 4})
       : super(context, tokenLimit: tokenLimit);
 
   @override
   Future<User> getResourceOwner(AuthServer server, String username) async {
-    final query = Query<User>(context)
+    final userQuery = Query<User>(context)
       ..where((u) => u.username).equalTo(username)
       ..returningProperties(
           (x) => [x.id, x.username, x.hashedPassword, x.salt]);
 
-    final user = await query.fetchOne();
+    final user = await userQuery.fetchOne();
     if (user == null) {
       return null;
     }
 
-    final metaquery = Query<AccessCode>(context)
+    final accessCodeQuery = Query<AccessCode>(context)
       ..where((a) => a.user.id).equalTo(user.id);
 
-    final meta = await metaquery.fetchOne();
+    final accessCode = await accessCodeQuery.fetchOne();
 
-    user.accesscode = meta;
+    user.accesscode = accessCode;
 
     return user;
   }
@@ -117,7 +119,7 @@ class RoleBasedAuthDelegate extends ManagedAuthDelegate<User> {
   List<AuthScope> getAllowedScopes(covariant User user) {
     if (user.accesscode.role == Role.admin) {
       return [AuthScope('admin'), AuthScope('user'), AuthScope('coupon')];
-    } else if (user.accesscode.role == Role.couponUser) {
+    } else if (user.accesscode.role == Role.coupon) {
       return [AuthScope('user'), AuthScope('coupon')];
     } else if (user.accesscode.role == Role.user) {
       return [AuthScope('user')];

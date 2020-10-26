@@ -5,44 +5,41 @@ import 'coupon_code.dart';
 import 'store.dart';
 import 'vendor.dart';
 
-class MetadataCouponCode extends ManagedObject<_MetadataCouponCode>
-    implements _MetadataCouponCode {}
+class CouponCodeMetadata extends ManagedObject<_CouponCodeMetadata>
+    implements _CouponCodeMetadata {}
 
-class _MetadataCouponCode extends _Metadata {
-  @Relate(#accessMetaDataCouponCode, onDelete: DeleteRule.cascade)
+class _CouponCodeMetadata extends _Metadata {
+  @Relate(#couponCodeMetadata, onDelete: DeleteRule.cascade)
   CouponCode couponCode;
-
-  @Column(indexed: true, nullable: true)
-  DateTime redeemedAt;
 }
 
-class MetadataCoupon extends ManagedObject<_MetadataCoupon>
-    implements _MetadataCoupon {}
+class CouponMetadata extends ManagedObject<_CouponMetadata>
+    implements _CouponMetadata {}
 
-class _MetadataCoupon extends _Metadata {
-  @Relate(#accessMetaDataCoupon, onDelete: DeleteRule.cascade)
+class _CouponMetadata extends _Metadata {
+  @Relate(#couponMetadata, onDelete: DeleteRule.cascade)
   Coupon coupon;
 
   @Column(indexed: true)
   DateTime startDate;
 
   @Column(indexed: true)
-  DateTime experationDate;
+  DateTime expirationDate;
 }
 
-class AccessMetaDataStore extends ManagedObject<MetadataStore>
-    implements MetadataStore {}
+class StoreMetadata extends ManagedObject<_StoreMetadata>
+    implements _StoreMetadata {}
 
-class MetadataStore extends _Metadata {
-  @Relate(#accessMetaDataStore, onDelete: DeleteRule.cascade)
+class _StoreMetadata extends _Metadata {
+  @Relate(#storeMetadata, onDelete: DeleteRule.cascade)
   Store store;
 }
 
-class MetadataVendor extends ManagedObject<_MetadataVendor>
-    implements _MetadataVendor {}
+class VendorMetadata extends ManagedObject<_VendorMetadata>
+    implements _VendorMetadata {}
 
-class _MetadataVendor extends _Metadata {
-  @Relate(#accessMetaDataVendor, onDelete: DeleteRule.cascade)
+class _VendorMetadata extends _Metadata {
+  @Relate(#vendorMetadata, onDelete: DeleteRule.cascade)
   Vendor vendor;
 }
 

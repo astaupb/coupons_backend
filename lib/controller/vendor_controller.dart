@@ -24,11 +24,51 @@ class VendorController extends ResourceController {
   @Operation.get('id')
   Future<Response> getVenodorByID(@Bind.path('id') int id) async {
     final vendorQuery = Query<Vendor>(context)..where((v) => v.id).equalTo(id);
-    final vendor = await vendorQuery.fetchOne();
+    final vendor = await vendorQuery.fetch();
     if (vendor == null) {
       return Response.notFound();
     }
     return Response.ok(vendor);
+  }
+
+  @Scope(['admin'])
+  @Operation.put('id')
+  Future<Response> updateVendor(@Bind.path('id') int id,
+      @Bind.body(ignore: ['id', 'metadataVendor']) Vendor vendor) async {
+    final updateQuery = Query<Vendor>(context)
+      ..where((v) => v.id).equalTo(id)
+      ..values = vendor;
+
+    final update = await updateQuery.updateOne();
+
+    if (update == null) {
+      return Response.notFound();
+    }
+
+    final now = DateTime.now().toUtc();
+
+    final updateMetadataQuery = Query<VendorMetadata>(context)
+      ..where((m) => m.vendor.id).equalTo(id)
+      ..values.changedAt = now;
+
+    final updateMetadata = updateMetadataQuery.updateOne();
+    if (updateMetadata == null) {
+      return Response.serverError();
+    }
+    return Response.ok(update);
+  }
+
+  @Scope(['admin'])
+  @Operation.delete('id')
+  Future<Response> deleteVendor(@Bind.path('id') int id) async {
+    final deleteQuery = Query<Vendor>(context)..where((v) => v.id).equalTo(id);
+
+    final delete = await deleteQuery.delete();
+    if (delete == null) {
+      return Response.notFound();
+    }
+
+    return Response.ok(delete);
   }
 
   @Scope(['admin'])
@@ -47,7 +87,7 @@ class VendorController extends ResourceController {
     final insertedVendor = await vendorQuery.insert();
 
     final now = DateTime.now().toUtc();
-    final accessMetaDataVendorQuery = Query<MetadataVendor>(context)
+    final accessMetaDataVendorQuery = Query<VendorMetadata>(context)
       ..values.changedAt = now
       ..values.createdAt = now
       ..values.vendor = insertedVendor;
@@ -55,7 +95,10 @@ class VendorController extends ResourceController {
     final insertedAccessMetaDataVendorQuery =
         await accessMetaDataVendorQuery.insert();
 
-    return Response.ok([insertedVendor, insertedAccessMetaDataVendorQuery]);
+    if (insertedAccessMetaDataVendorQuery == null) {
+      return Response.notFound();
+    }
+    return Response.ok(insertedVendor);
   }
 
   @override
@@ -63,10 +106,12 @@ class VendorController extends ResourceController {
       APIDocumentContext context, Operation operation) {
     if (operation.method == "POST") {
       return APIRequestBody.schema(context.schema['Vendor']);
+    } else if (operation.method == 'PUT') {
+      return APIRequestBody.schema(context.schema['Vendor']);
     }
     return null;
   }
-
+  
   @override
   Map<String, APIResponse> documentOperationResponses(
       APIDocumentContext context, Operation operation) {
@@ -86,6 +131,6 @@ class VendorController extends ResourceController {
         "200": APIResponse.schema("Add a vendor", context.schema['Vendor'])
       };
     }
-    return {"400": APIResponse("Unknown error")};
+    return {"400": APIResponse("Unkown error")};
   }
 }
