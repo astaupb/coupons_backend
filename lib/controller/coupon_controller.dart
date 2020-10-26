@@ -30,6 +30,7 @@ class CouponController extends ResourceController {
     final couponQuery = Query<Coupon>(context)
       ..where((c) => c.vendor.id).equalTo(vendorID)
       ..where((c) => c.id).equalTo(id);
+
     final coupon = await couponQuery.fetchOne();
     if (coupon == null) {
       return Response.notFound();
@@ -69,7 +70,7 @@ class CouponController extends ResourceController {
       ..values.createdAt = now
       ..values.coupon = insertedCoupon;
 
-    final insertedMetadata = metadata.insert();
+    final insertedMetadata = await metadata.insert();
     if (insertedMetadata == null) {
       return Response.serverError();
     }

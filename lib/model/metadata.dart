@@ -19,12 +19,6 @@ class CouponMetadata extends ManagedObject<_CouponMetadata>
 class _CouponMetadata extends _Metadata {
   @Relate(#couponMetadata, onDelete: DeleteRule.cascade)
   Coupon coupon;
-
-  @Column(indexed: true)
-  DateTime startDate;
-
-  @Column(indexed: true)
-  DateTime expirationDate;
 }
 
 class StoreMetadata extends ManagedObject<_StoreMetadata>
