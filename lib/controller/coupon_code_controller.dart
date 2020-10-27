@@ -63,10 +63,12 @@ class CouponCodeController extends ResourceController {
       @Bind.path('vendorID') int vendorID,
       @Bind.path('couponID') int couponID) async {
     final userID = request.authorization.ownerID;
-
+    final now = DateTime.now().toUtc();
     final couponRestrictionLevelQuery = Query<Coupon>(context)
       ..where((c) => c.id).equalTo(couponID)
-      ..where((c) => c.vendor.id).equalTo(vendorID);
+      ..where((c) => c.vendor.id).equalTo(vendorID)
+      ..where((c) => c.startDate).lessThan(now)
+      ..where((c) => c.expirationDate).greaterThan(now);
 
     final couponQuery = await couponRestrictionLevelQuery.fetchOne();
 
