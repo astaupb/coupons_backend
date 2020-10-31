@@ -10,3 +10,5 @@
 | telephone     | Telephone number in text format                               | Vendor, Store         |
 | latlng        | Comma-seperated latitude longitude values (eg. '51.706,8.745')| Vendor, Store         |
 | code          | Optional permanent code string                                | Coupon                |
+| product       | product image for display on vendor page                      | Vendor                |
+| website       | URL of vendor's website                                       | Vendor                | 
