@@ -1,0 +1,11 @@
+[Unit]
+Description=AStA Coupon Aqueduct Backend
+
+[Service]
+Type=simple
+ExecStart=/<PATH_TO_DART_2.8_BINARY> /<PATH_TO_COUPONS_BACKEND_FOLDER>/coupons_backend/bin/main.dart
+Restart=on-failure
+
+
+[Install]
+WantedBy=multi-user.target
