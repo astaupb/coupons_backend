@@ -8,4 +8,7 @@
 | logo          | Logo image in base64 encoding                                 | Vendor                |
 | description   | Short text describing the object                              | Vendor, Store, Coupon |
 | telephone     | Telephone number in text format                               | Vendor, Store         |
-| latlng        | Comma-seperated latitude longitude values (eg. '51.706,8.745')| Vendor, Store
+| latlng        | Comma-seperated latitude longitude values (eg. '51.706,8.745')| Vendor, Store         |
+| code          | Optional permanent code string                                | Coupon                |
+| product       | product image for display on vendor page                      | Vendor                |
+| website       | URL of vendor's website                                       | Vendor                | 
