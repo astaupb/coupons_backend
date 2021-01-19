@@ -44,6 +44,10 @@ class CouponsBackendChannel extends ApplicationChannel {
 
     // Route for external registration over OAuth
     // router.route('/auth/code').link(() => AuthRedirectController(authServer));
+    router
+        .route('/assets/*')
+        .link(() => Authorizer.bearer(authServer, scopes: ['admin', 'user']))
+        .link(() => FileController('/home/daniel/Documents/projects/dart/coupons_backend/assets'));
 
     router
         .route('/register')

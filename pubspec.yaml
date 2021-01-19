@@ -9,6 +9,7 @@ environment:
 dependencies:
   aqueduct: ^4.0.0-b1 
   uuid: ^2.2.2
+  mime: any
 
 dev_dependencies:
   test: ^1.0.0

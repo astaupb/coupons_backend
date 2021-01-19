@@ -16,3 +16,4 @@ client.html
 config.yaml
 migrations/*
 .dart_tool
+assets/*
