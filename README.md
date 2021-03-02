@@ -3,6 +3,10 @@
 ## Dependencies
 
 - Postgresql >=9.8
+- Dart 2.8.4-1
+- aqueduct 4.0.0-b1 
+(analyzer is breaking compiling as of 03.02.2021. Use https://github.com/igotyou/aqueduct/ 
+than activate with ```pub global activate --source path ./aqueduct```)
 
 ## Generate Database Layout
 
@@ -41,4 +45,3 @@ pub run test
 
 The default configuration file used when testing is `config.src.yaml`. This file should be checked into version control. It also the template for configuration files used in deployment.
 
-ToDo: Add tests
