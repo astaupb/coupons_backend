@@ -1,6 +1,6 @@
 {"openapi":"3.0.0","info":{"title":"coupons_backend","description":"An asta_coupons backend","version":"0.0.1"},"servers":[
     {
-        "url":"http://asta-vm-78.uni-paderborn.de",
+        "url":"http://asta-vm-78",
         "description":"Development server"
     },
     {
