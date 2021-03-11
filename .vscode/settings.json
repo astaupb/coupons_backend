@@ -10,5 +10,6 @@
             "database": "asta_coupon",
             "username": "asta_coupon_user"
         }
-    ]
+    ],
+    "dart.sdkPath": "/usr/lib/dart"
 }
