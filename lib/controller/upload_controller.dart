@@ -11,12 +11,12 @@ class UploadController extends ResourceController {
   @Operation.get()
   Future<Response> getFiles() async {
     final assetsDir = Directory('assets');
-    final files = [];
-    assetsDir
+    final files = <String>[];
+    await assetsDir
         .list(recursive: true, followLinks: false)
         .listen((FileSystemEntity entity) {
       files.add(entity.path.split('/').last);
-    });
+    }).asFuture();
 
     return Response.ok(files.toString());
   }
