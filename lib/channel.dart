@@ -1,5 +1,6 @@
 import 'package:aqueduct/managed_auth.dart';
 import 'package:coupons_backend/controller/access_code_controller.dart';
+import 'package:coupons_backend/controller/upload_controller.dart';
 import 'package:coupons_backend/model/access_codes.dart';
 import 'controller/access_code_controller.dart';
 import 'controller/coupon_code_controller.dart';
@@ -47,7 +48,12 @@ class CouponsBackendChannel extends ApplicationChannel {
     router
         .route('/assets/*')
         .link(() => Authorizer.bearer(authServer, scopes: ['admin', 'user']))
-        .link(() => FileController('/home/daniel/Documents/projects/dart/coupons_backend/assets'));
+        .link(() => FileController('assets'));
+
+    router
+        .route('/upload')
+        ///.link(() => Authorizer.bearer(authServer, scopes: ['admin']))
+        .link(() => UploadController());
 
     router
         .route('/register')

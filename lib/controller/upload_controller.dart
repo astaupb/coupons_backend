@@ -4,24 +4,32 @@ import 'package:aqueduct/aqueduct.dart';
 import '../coupons_backend.dart';
 
 class UploadController extends ResourceController {
-  UploadController(this.context) {
-    acceptedContentTypes = [
-      ContentType('image', 'png'),
-      ContentType('image', 'jpeg'),
-      ContentType('image', 'tiff'),
-      ContentType('image', 'apng'),
-      ContentType('image', 'webp'),
-      ContentType('image', 'gif'),
-      ContentType('image', 'x-mng'),
-      ContentType('image', 'x-icon'),
-      ContentType('image', '')
-    ];
+  UploadController() {
+    acceptedContentTypes = [ContentType("image", "png")];
   }
-  final ManagedContext context;
+
+  @Operation.get()
+  Future<Response> getFiles() async {
+    final assetsDir = Directory('assets');
+    final files = [];
+    assetsDir
+        .list(recursive: true, followLinks: false)
+        .listen((FileSystemEntity entity) {
+      files.add(entity.path.split('/').last);
+    });
+
+    return Response.ok(files.toString());
+  }
 
   @Operation.post()
-  Future<Response> postForm(@Bind.body() File upload) async {
-    await upload.create();
-    return Response.created(upload.path.toString());
+  Future<Response> postPng() async {
+    final bodyBytes = await request.body.decode<List<int>>();
+    final filename = '${DateTime.now().millisecondsSinceEpoch.toString()}.png';
+    final file = await File('assets/${filename}').writeAsBytes(bodyBytes);
+    if (file.existsSync()) {
+      return Response.ok(filename);
+    } else {
+      return Response.noContent();
+    }
   }
 }

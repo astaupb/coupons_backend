@@ -12,6 +12,15 @@
     }],
     "paths":{
     "/upload": {
+        "get": {
+            "description":"Get all files in assets folder",
+            "parameters": [],
+            "responses": {
+                "200": {
+                    "description": "OK"
+                }
+            }
+        },
         "post": {
             "description": "Upload route, files will be safed in assets folder",
             "requestBody":{
