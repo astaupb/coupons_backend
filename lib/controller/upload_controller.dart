@@ -40,7 +40,6 @@ class UploadController extends ResourceController {
 
   @Operation.post()
   Future<Response> postFile() async {
-    const assetsFolderPath = 'assets';
     var filename = '${DateTime.now().millisecondsSinceEpoch}';
     final newFilePath = '$assetsFolderPath${Platform.pathSeparator}$filename';
 
