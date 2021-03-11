@@ -5,7 +5,11 @@ import '../coupons_backend.dart';
 
 class UploadController extends ResourceController {
   UploadController() {
-    acceptedContentTypes = [ContentType("image", "png")];
+    acceptedContentTypes = [
+      ContentType("image", "png"),
+      ContentType("image", "jpeg"),
+      ContentType("image", "bmp")
+    ];
   }
 
   @Operation.get()

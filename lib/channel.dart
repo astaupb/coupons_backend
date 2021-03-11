@@ -52,7 +52,7 @@ class CouponsBackendChannel extends ApplicationChannel {
 
     router
         .route('/upload')
-        ///.link(() => Authorizer.bearer(authServer, scopes: ['admin']))
+        .link(() => Authorizer.bearer(authServer, scopes: ['admin']))
         .link(() => UploadController());
 
     router
