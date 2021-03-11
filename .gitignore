@@ -18,3 +18,5 @@ migrations/*
 .dart_tool
 assets/*
 .dart_tool/package_config.json
+
+doc
