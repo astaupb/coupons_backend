@@ -1,7 +1,9 @@
 name: coupons_backend
 description: An asta_coupons backend
 version: 0.1.0
-author: Daniel Negi <dnegi@asta.uni-paderborn.de>
+authors: 
+  - Daniel Negi <dnegi@asta.uni-paderborn.de>
+  - Leon Tappe <ltappe@mail.upb.de>
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
