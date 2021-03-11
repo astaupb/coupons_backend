@@ -20,3 +20,5 @@ assets/*
 .dart_tool/package_config.json
 
 doc
+
+scripts/codes
