@@ -33,6 +33,8 @@ class UploadController extends ResourceController {
       files.add(entity.path.split(Platform.pathSeparator).last);
     }).asFuture();
 
+    files.sort();
+
     return Response.ok(files.toString());
   }
 
@@ -52,6 +54,7 @@ class UploadController extends ResourceController {
 
     // check mimetype and append suffix to filename
     if (contentType == null || mimeType != contentType) {
+      await file.delete();
       return Response.badRequest(
           body: 'content-type not given or inconsistent with file');
     }
@@ -62,6 +65,7 @@ class UploadController extends ResourceController {
             return type.mimeType == contentType;
           }).mimeType.split('/').last}';
     } catch (e) {
+      await file.delete();
       return Response.badRequest(body: e.toString());
     }
 
@@ -72,6 +76,7 @@ class UploadController extends ResourceController {
     if (file.existsSync()) {
       return Response.ok(filename);
     } else {
+      await file.delete();
       return Response.noContent();
     }
   }
