@@ -16,5 +16,7 @@ client.html
 config.yaml
 migrations/*
 .dart_tool
+assets/*
+.dart_tool/package_config.json
 
-scripts/codes
+doc

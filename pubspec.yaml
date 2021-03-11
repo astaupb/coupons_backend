@@ -4,11 +4,13 @@ version: 0.0.1
 author: Daniel Negi <dnegi@asta.uni-paderborn.de>
 
 environment:
-  sdk: ">=2.0.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   aqueduct: ^4.0.0-b1 
   uuid: ^2.2.2
+  mime: 0.9.6+3
+  http_server: ^0.9.8+1
 
 dev_dependencies:
   test: ^1.0.0

@@ -10,3 +10,4 @@ export 'package:aqueduct/aqueduct.dart';
 
 export 'channel.dart';
 
+const assetsFolderPath = 'assets';
