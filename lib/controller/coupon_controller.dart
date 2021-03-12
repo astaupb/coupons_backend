@@ -1,4 +1,5 @@
 import 'package:aqueduct/aqueduct.dart';
+import 'package:coupons_backend/model/user.dart';
 
 import '../coupons_backend.dart';
 import '../model/coupon.dart';
@@ -59,7 +60,7 @@ class CouponController extends ResourceController {
     final query = Query<Coupon>(context)..where((c) => c.vendor.id).equalTo(vendorID);
     query.join(set: (x) => x.usedBy)
       ..where((x) => x.usedBy.id).equalTo(userID)
-      ..returningProperties((x) => [x.usedBy]);
+      ..returningProperties((x) => <User>[x.usedBy]);
     final coupons = await query.fetch();
     if (coupons == null || coupons.isEmpty) {
       return Response.notFound();
@@ -78,7 +79,7 @@ class CouponController extends ResourceController {
       ..where((c) => c.id).equalTo(id);
     couponQuery.join(set: (x) => x.usedBy)
       ..where((x) => x.usedBy.id).equalTo(userID)
-      ..returningProperties((x) => [x.usedBy]);
+      ..returningProperties((x) => <User>[x.usedBy]);
 
     final coupon = await couponQuery.fetchOne();
     if (coupon == null) {

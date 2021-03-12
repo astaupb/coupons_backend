@@ -29,7 +29,7 @@ class UploadController extends ResourceController {
     final files = <String>[];
     await assetsDir.list(recursive: true, followLinks: false).listen((FileSystemEntity entity) {
       files.add(entity.path.split(Platform.pathSeparator).last);
-    }).asFuture();
+    }).asFuture<Null>();
 
     files.sort();
 

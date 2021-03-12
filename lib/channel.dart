@@ -119,7 +119,7 @@ class RoleBasedAuthDelegate extends ManagedAuthDelegate<User> {
   Future<User> getResourceOwner(AuthServer server, String username) async {
     final userQuery = Query<User>(context)
       ..where((u) => u.username).equalTo(username)
-      ..returningProperties((x) => [x.id, x.username, x.hashedPassword, x.salt]);
+      ..returningProperties((x) => <dynamic>[x.id, x.username, x.hashedPassword, x.salt]);
 
     final user = await userQuery.fetchOne();
     if (user == null) {
