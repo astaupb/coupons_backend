@@ -27,9 +27,7 @@ class UploadController extends ResourceController {
   Future<Response> getFiles() async {
     final assetsDir = Directory('assets');
     final files = <String>[];
-    await assetsDir
-        .list(recursive: true, followLinks: false)
-        .listen((FileSystemEntity entity) {
+    await assetsDir.list(recursive: true, followLinks: false).listen((FileSystemEntity entity) {
       files.add(entity.path.split(Platform.pathSeparator).last);
     }).asFuture();
 
@@ -48,14 +46,12 @@ class UploadController extends ResourceController {
     final contentType = request.raw.headers['Content-Type'].single;
     var file = await File(newFilePath).writeAsBytes(bodyBytes);
 
-    final mimeType =
-        mimeChecker.lookup(file.path, headerBytes: bodyBytes.take(8).toList());
+    final mimeType = mimeChecker.lookup(file.path, headerBytes: bodyBytes.take(8).toList());
 
     // check mimetype and append suffix to filename
     if (contentType == null || mimeType != contentType) {
       await file.delete();
-      return Response.badRequest(
-          body: 'content-type not given or inconsistent with file');
+      return Response.badRequest(body: 'content-type not given or inconsistent with file');
     }
 
     try {
@@ -68,8 +64,7 @@ class UploadController extends ResourceController {
       return Response.badRequest(body: e.toString());
     }
 
-    file = await file
-        .rename('$assetsFolderPath${Platform.pathSeparator}$filename');
+    file = await file.rename('$assetsFolderPath${Platform.pathSeparator}$filename');
 
     // return name if file was successfully renamed
     if (file.existsSync()) {

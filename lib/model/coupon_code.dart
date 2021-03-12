@@ -10,7 +10,7 @@ class _CouponCode {
 
   String code;
 
-  @Column(defaultValue: "false")
+  @Column(defaultValue: 'false')
   bool redeemed;
 
   @Relate(#codes, onDelete: DeleteRule.cascade)

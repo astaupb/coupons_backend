@@ -13,6 +13,8 @@ import 'model/access_codes.dart';
 import 'model/user.dart';
 
 class CouponConfig extends Configuration {
+  CouponConfig(String path) : super.fromFile(File(path));
+
   @optionalConfiguration
   String adminkey;
 
@@ -20,8 +22,6 @@ class CouponConfig extends Configuration {
   String couponkey;
 
   DatabaseConfiguration database;
-
-  CouponConfig(String path) : super.fromFile(File(path));
 }
 
 class CouponsBackendChannel extends ApplicationChannel {
@@ -47,9 +47,7 @@ class CouponsBackendChannel extends ApplicationChannel {
         .link(() => Authorizer.bearer(authServer, scopes: ['admin']))
         .link(() => UploadController());
 
-    router
-        .route('/register')
-        .link(() => RegisterController(context, authServer));
+    router.route('/register').link(() => RegisterController(context, authServer));
 
     router
         .route('/codes')
@@ -81,8 +79,7 @@ class CouponsBackendChannel extends ApplicationChannel {
 
   @override
   Future prepare() async {
-    logger.onRecord.listen(
-        (rec) => print("$rec ${rec.error ?? ""} ${rec.stackTrace ?? ""}"));
+    logger.onRecord.listen((rec) => print('$rec ${rec.error ?? ''} ${rec.stackTrace ?? ''}'));
 
     // Set to false in production!
     Controller.includeErrorDetailsInServerErrorResponses = true;
@@ -122,16 +119,14 @@ class RoleBasedAuthDelegate extends ManagedAuthDelegate<User> {
   Future<User> getResourceOwner(AuthServer server, String username) async {
     final userQuery = Query<User>(context)
       ..where((u) => u.username).equalTo(username)
-      ..returningProperties(
-          (x) => [x.id, x.username, x.hashedPassword, x.salt]);
+      ..returningProperties((x) => [x.id, x.username, x.hashedPassword, x.salt]);
 
     final user = await userQuery.fetchOne();
     if (user == null) {
       return null;
     }
 
-    final accessCodeQuery = Query<AccessCode>(context)
-      ..where((a) => a.user.id).equalTo(user.id);
+    final accessCodeQuery = Query<AccessCode>(context)..where((a) => a.user.id).equalTo(user.id);
 
     final accessCode = await accessCodeQuery.fetchOne();
 

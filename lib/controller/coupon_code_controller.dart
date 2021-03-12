@@ -12,10 +12,8 @@ class CouponCodeController extends ResourceController {
 
   @Scope(['admin'])
   @Operation.delete('vendorID', 'couponID', 'id')
-  Future<Response> deleteCouponCodeByIDByCoupon(
-      @Bind.path('vendorID') int vendorID,
-      @Bind.path('couponID') int couponID,
-      @Bind.path('id') int id) async {
+  Future<Response> deleteCouponCodeByIDByCoupon(@Bind.path('vendorID') int vendorID,
+      @Bind.path('couponID') int couponID, @Bind.path('id') int id) async {
     final deleteQuery = Query<CouponCode>(context)
       ..where((c) => c.id).equalTo(id)
       ..where((c) => c.coupon.id).equalTo(couponID)
@@ -31,9 +29,8 @@ class CouponCodeController extends ResourceController {
   }
 
   @override
-  APIRequestBody documentOperationRequestBody(
-      APIDocumentContext context, Operation operation) {
-    if (operation.method == "POST") {
+  APIRequestBody documentOperationRequestBody(APIDocumentContext context, Operation operation) {
+    if (operation.method == 'POST') {
       return APIRequestBody.schema(context.schema['CouponCode']);
     }
     return null;
@@ -42,26 +39,21 @@ class CouponCodeController extends ResourceController {
   @override
   Map<String, APIResponse> documentOperationResponses(
       APIDocumentContext context, Operation operation) {
-    if (operation.method == "GET") {
+    if (operation.method == 'GET') {
       return {
-        "200": APIResponse.schema(
-            "Get a coupon code", context.schema["CouponCode"]),
-        "404": APIResponse("Could not find any redeemable couponcode!")
+        '200': APIResponse.schema('Get a coupon code', context.schema['CouponCode']),
+        '404': APIResponse('Could not find any redeemable couponcode!')
       };
-    } else if (operation.method == "POST") {
-      return {
-        "200":
-            APIResponse.schema("Add a couponcode", context.schema["CouponCode"])
-      };
+    } else if (operation.method == 'POST') {
+      return {'200': APIResponse.schema('Add a couponcode', context.schema['CouponCode'])};
     }
-    return {"400": APIResponse("Unkown error")};
+    return {'400': APIResponse('Unkown error')};
   }
 
   @Scope(['user'])
   @Operation.get('vendorID', 'couponID')
   Future<Response> getCodeByCouponIDByVendorID(
-      @Bind.path('vendorID') int vendorID,
-      @Bind.path('couponID') int couponID) async {
+      @Bind.path('vendorID') int vendorID, @Bind.path('couponID') int couponID) async {
     final userID = request.authorization.ownerID;
     final now = DateTime.now().toUtc();
     final couponRestrictionLevelQuery = Query<Coupon>(context)
@@ -179,8 +171,7 @@ class CouponCodeController extends ResourceController {
   @Scope(['admin'])
   @Operation.post('vendorID', 'couponID')
   Future<Response> postCouponCodeByCouponIDByVendorID(
-      @Bind.path('vendorID') int vendorID,
-      @Bind.path('couponID') int couponID) async {
+      @Bind.path('vendorID') int vendorID, @Bind.path('couponID') int couponID) async {
     if (request.body.isEmpty) {
       return Response.badRequest();
     }
@@ -226,14 +217,10 @@ class CouponCodeController extends ResourceController {
   @Scope(['admin'])
   @Operation.put('vendorID', 'couponID', 'id')
   Future<Response> putCouponCodeByIDByCouponIDByVendorID(
-      @Bind.path('vendorID')
-          int vendorID,
-      @Bind.path('couponID')
-          int couponID,
-      @Bind.path('id')
-          int id,
-      @Bind.body(ignore: ['metadataCouponCode', 'coupon', 'id'])
-          CouponCode couponCode) async {
+      @Bind.path('vendorID') int vendorID,
+      @Bind.path('couponID') int couponID,
+      @Bind.path('id') int id,
+      @Bind.body(ignore: ['metadataCouponCode', 'coupon', 'id']) CouponCode couponCode) async {
     final updateQuery = Query<CouponCode>(context)
       ..where((c) => c.id).equalTo(id)
       ..where((c) => c.coupon.id).equalTo(couponID)

@@ -6,9 +6,9 @@ import 'metadata.dart';
 
 enum RestrictionLevel {
   // Restriction level describes how often a coupon can be used by each user
-  //  "permanent": coupon can be used by each user over and over again
-  //  "eachuser": each user can use this couponcode once
-  //  "oneuser": one user can use this couponcode once
+  //  'permanent': coupon can be used by each user over and over again
+  //  'eachuser': each user can use this couponcode once
+  //  'oneuser': one user can use this couponcode once
   permanent,
   eachuser,
   oneuser

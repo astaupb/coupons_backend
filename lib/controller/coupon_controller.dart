@@ -10,13 +10,53 @@ class CouponController extends ResourceController {
 
   final ManagedContext context;
 
+  @Scope(['admin'])
+  @Operation.delete('vendorID', 'id')
+  Future<Response> deleteCouponByIDByVendorID(
+      @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
+    final deleteCouponQuery = Query<Coupon>(context)
+      ..where((c) => c.id).equalTo(id)
+      ..where((c) => c.vendor.id).equalTo(vendorID);
+
+    final deleteCoupon = await deleteCouponQuery.delete();
+
+    if (deleteCoupon == null) {
+      return Response.notFound();
+    }
+
+    return Response.accepted();
+  }
+
+  @override
+  APIRequestBody documentOperationRequestBody(APIDocumentContext context, Operation operation) {
+    if (operation.method == 'POST' || operation.method == 'PUT') {
+      return APIRequestBody.schema(context.schema['Coupon']);
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Map<String, APIResponse> documentOperationResponses(
+      APIDocumentContext context, Operation operation) {
+    if (operation.method == 'GET') {
+      return {'200': APIResponse.schema('Get coupon', context.schema['Coupon'])};
+    } else if (operation.method == 'POST') {
+      return {'200': APIResponse.schema('Add a coupon', context.schema['Coupon'])};
+    } else if (operation.method == 'PUT') {
+      return {'200': APIResponse.schema('Update a coupon', context.schema['Coupon'])};
+    } else if (operation.method == 'DELETE') {
+      return {'202': APIResponse('accepted')};
+    }
+    return {'400': APIResponse('Unkown error')};
+  }
+
   @Scope(['user'])
   @Operation.get('vendorID')
   Future<Response> getAllCouponByVendorID(
       @requiredBinding @Bind.path('vendorID') int vendorID) async {
     final userID = request.authorization.ownerID;
-    final query = Query<Coupon>(context)
-      ..where((c) => c.vendor.id).equalTo(vendorID);
+    final query = Query<Coupon>(context)..where((c) => c.vendor.id).equalTo(vendorID);
     query.join(set: (x) => x.usedBy)
       ..where((x) => x.usedBy.id).equalTo(userID)
       ..returningProperties((x) => [x.usedBy]);
@@ -49,16 +89,14 @@ class CouponController extends ResourceController {
 
   @Scope(['admin'])
   @Operation.post('vendorID')
-  Future<Response> insertCouponByIDByVendorID(
-      @Bind.path('vendorID') int vendorID) async {
+  Future<Response> insertCouponByIDByVendorID(@Bind.path('vendorID') int vendorID) async {
     if (request.body.isEmpty) {
       return Response.badRequest();
     }
 
     final now = DateTime.now();
 
-    final vendorQuery = Query<Vendor>(context)
-      ..where((v) => v.id).equalTo(vendorID);
+    final vendorQuery = Query<Vendor>(context)..where((v) => v.id).equalTo(vendorID);
 
     final vendor = await vendorQuery.fetchOne();
     if (vendor == null) {
@@ -115,53 +153,5 @@ class CouponController extends ResourceController {
       return Response.serverError();
     }
     return Response.ok(update);
-  }
-
-  @Scope(['admin'])
-  @Operation.delete('vendorID', 'id')
-  Future<Response> deleteCouponByIDByVendorID(
-      @Bind.path('vendorID') int vendorID, @Bind.path('id') int id) async {
-    final deleteCouponQuery = Query<Coupon>(context)
-      ..where((c) => c.id).equalTo(id)
-      ..where((c) => c.vendor.id).equalTo(vendorID);
-
-    final deleteCoupon = await deleteCouponQuery.delete();
-
-    if (deleteCoupon == null) {
-      return Response.notFound();
-    }
-
-    return Response.accepted();
-  }
-
-  @override
-  APIRequestBody documentOperationRequestBody(
-      APIDocumentContext context, Operation operation) {
-    if (operation.method == "POST" || operation.method == "PUT") {
-      return APIRequestBody.schema(context.schema['Coupon']);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  Map<String, APIResponse> documentOperationResponses(
-      APIDocumentContext context, Operation operation) {
-    if (operation.method == "GET") {
-      return {
-        "200": APIResponse.schema("Get coupon", context.schema["Coupon"])
-      };
-    } else if (operation.method == "POST") {
-      return {
-        "200": APIResponse.schema("Add a coupon", context.schema["Coupon"])
-      };
-    } else if (operation.method == 'PUT') {
-      return {
-        "200": APIResponse.schema("Update a coupon", context.schema["Coupon"])
-      };
-    } else if (operation.method == 'DELETE') {
-      return {"202": APIResponse("accepted")};
-    }
-    return {"400": APIResponse("Unkown error")};
   }
 }
