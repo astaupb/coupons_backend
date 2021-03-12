@@ -78,10 +78,16 @@ class VendorController extends ResourceController {
 
   @Scope(['user'])
   @Operation.get()
-  Future<Response> getAllVendor({@Bind.query('name') String name}) async {
+  Future<Response> getAllVendor({
+    @Bind.query('name') String name,
+    @Bind.query('slim') bool slim = false,
+  }) async {
     final vendorQuery = Query<Vendor>(context);
     if (name != null) {
       vendorQuery.where((v) => v.name).contains(name, caseSensitive: false);
+    }
+    if (slim) {
+      vendorQuery.returningProperties((Vendor v) => <dynamic>[v.id, v.name, v.stores, v.coupons]);
     }
     final vendors = await vendorQuery.fetch();
 
