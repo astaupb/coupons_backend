@@ -373,6 +373,15 @@
                         "schema": {
                             "type": "string"
                         }
+                    },
+                    {
+                        "name": "slim",
+                        "in": "query",
+                        "required": false,
+                        "allowEmptyValue": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
                     }
                 ],
                 "responses": {
