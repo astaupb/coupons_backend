@@ -5,9 +5,9 @@ import '../model/metadata.dart';
 import '../model/vendor.dart';
 
 class VendorController extends ResourceController {
-  VendorController(this.context);
-
   final ManagedContext context;
+
+  VendorController(this.context);
 
   @Scope(['admin'])
   @Operation.post()
@@ -30,8 +30,7 @@ class VendorController extends ResourceController {
       ..values.createdAt = now
       ..values.vendor = insertedVendor;
 
-    final insertedAccessMetaDataVendorQuery =
-        await accessMetaDataVendorQuery.insert();
+    final insertedAccessMetaDataVendorQuery = await accessMetaDataVendorQuery.insert();
 
     if (insertedAccessMetaDataVendorQuery == null) {
       return Response.notFound();
@@ -53,8 +52,7 @@ class VendorController extends ResourceController {
   }
 
   @override
-  APIRequestBody documentOperationRequestBody(
-      APIDocumentContext context, Operation operation) {
+  APIRequestBody documentOperationRequestBody(APIDocumentContext context, Operation operation) {
     if (operation.method == 'POST') {
       return APIRequestBody.schema(context.schema['Vendor']);
     } else if (operation.method == 'PUT') {
@@ -68,19 +66,12 @@ class VendorController extends ResourceController {
       APIDocumentContext context, Operation operation) {
     if (operation.method == 'GET') {
       if (operation.pathVariables.contains('id')) {
-        return {
-          '200':
-              APIResponse.schema('Get a vendor by id', context.schema['Vendor'])
-        };
+        return {'200': APIResponse.schema('Get a vendor by id', context.schema['Vendor'])};
       } else {
-        return {
-          '200': APIResponse.schema('All vendor', context.schema['Vendor'])
-        };
+        return {'200': APIResponse.schema('All vendor', context.schema['Vendor'])};
       }
     } else if (operation.method == 'POST') {
-      return {
-        '200': APIResponse.schema('Add a vendor', context.schema['Vendor'])
-      };
+      return {'200': APIResponse.schema('Add a vendor', context.schema['Vendor'])};
     }
     return {'400': APIResponse('Unkown error')};
   }
@@ -100,6 +91,13 @@ class VendorController extends ResourceController {
     }
     final vendors = await vendorQuery.fetch();
 
+    vendors.forEach((Vendor v) {
+      if (v.properties?.data != null) {
+        (v.properties.data as Map<String, dynamic>).removeWhere(
+            (String key, dynamic value) => key == 'image' || key == 'logo' || key == 'product');
+      }
+    });
+
     return Response.ok(vendors);
   }
 
@@ -116,8 +114,8 @@ class VendorController extends ResourceController {
 
   @Scope(['admin'])
   @Operation.put('id')
-  Future<Response> updateVendor(@Bind.path('id') int id,
-      @Bind.body(ignore: ['id', 'metadataVendor']) Vendor vendor) async {
+  Future<Response> updateVendor(
+      @Bind.path('id') int id, @Bind.body(ignore: ['id', 'metadataVendor']) Vendor vendor) async {
     final updateQuery = Query<Vendor>(context)
       ..where((v) => v.id).equalTo(id)
       ..values = vendor;
