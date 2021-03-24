@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:aqueduct/aqueduct.dart';
@@ -33,7 +34,7 @@ class UploadController extends ResourceController {
 
     files.sort();
 
-    return Response.ok(files.toString());
+    return Response.ok(json.encode(files));
   }
 
   @Operation.post()
