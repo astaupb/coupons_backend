@@ -34,7 +34,7 @@ class UploadController extends ResourceController {
 
     files.sort();
 
-    return Response.ok(json.encode(files));
+    return Response.ok(files);
   }
 
   @Operation.post()
