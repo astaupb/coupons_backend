@@ -2054,8 +2054,8 @@
                 "description": "Standard OAuth 2.0",
                 "flows": {
                     "password": {
-                        "tokenUrl": "http://localhost:8888/auth/token",
-                        "refreshUrl": "http://localhost:8888/auth/token",
+                        "tokenUrl": "https://iona.upb.de/coupons/v1/auth/token",
+                        "refreshUrl": "https://iona.upb.de/coupons/v1/auth/token",
                         "scopes": {
                             "admin": "",
                             "user": ""
