@@ -39,12 +39,12 @@ class CouponsBackendChannel extends ApplicationChannel {
     // router.route('/auth/code').link(() => AuthRedirectController(authServer));
     router
         .route('/assets/*')
-        .link(() => Authorizer.bearer(authServer, scopes: ['admin', 'user']))
+        .link(() => Authorizer.bearer(authServer))
         .link(() => AssetsController('assets'));
 
     router
         .route('/upload')
-        .link(() => Authorizer.bearer(authServer, scopes: ['admin']))
+        .link(() => Authorizer.bearer(authServer))
         .link(() => UploadController());
 
     router.route('/register').link(() => RegisterController(context, authServer));

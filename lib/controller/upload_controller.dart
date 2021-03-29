@@ -23,6 +23,7 @@ class UploadController extends ResourceController {
 
   MimeTypeResolver mimeChecker;
 
+  @Scope(['user'])
   @Operation.get()
   Future<Response> getFiles() async {
     final assetsDir = Directory('assets');
@@ -36,6 +37,7 @@ class UploadController extends ResourceController {
     return Response.ok(files);
   }
 
+  @Scope(['admin'])
   @Operation.post()
   Future<Response> postFile() async {
     var filename = '${DateTime.now().millisecondsSinceEpoch}';

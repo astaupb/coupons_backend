@@ -7,7 +7,7 @@ class AssetsController extends FileController {
   @override
   Future<RequestOrResponse> handle(Request request) async {
     // check for DELETE method and launch custom code accordingly
-    if (request.method == 'DELETE') {
+    if (request.method == 'DELETE' && request.authorization.scopes.contains('admin')) {
       final filename = request.path.remainingPath;
       final file = File('$assetsFolderPath${Platform.pathSeparator}$filename');
 
