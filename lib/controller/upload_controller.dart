@@ -10,9 +10,12 @@ const Map<List<int>, String> supportedTypes = <List<int>, String>{
   [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]: 'image/png',
   [0x47, 0x49, 0x46, 0x38]: 'image/gif',
   [0x42, 0x4D]: 'image/bmp',
+  [0x52, 0x49, 0x46, 0x46]: 'image/webp',
 };
 
 class UploadController extends ResourceController {
+  MimeTypeResolver mimeChecker;
+
   UploadController() {
     mimeChecker = MimeTypeResolver();
     supportedTypes.forEach(mimeChecker.addMagicNumber);
@@ -20,8 +23,6 @@ class UploadController extends ResourceController {
         .map((String e) => ContentType(e.split('/').first, e.split('/').last))
         .toList();
   }
-
-  MimeTypeResolver mimeChecker;
 
   @Scope(['user'])
   @Operation.get()
