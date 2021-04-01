@@ -87,7 +87,7 @@ class VendorController extends ResourceController {
       vendorQuery.where((v) => v.name).contains(name, caseSensitive: false);
     }
     if (slim == 'true') {
-      vendorQuery.returningProperties((Vendor v) => <dynamic>[v.id, v.name]);
+      vendorQuery.returningProperties((Vendor v) => <dynamic>[v.id, v.name, v.properties]);
     }
     final vendors = await vendorQuery.fetch();
 
