@@ -91,12 +91,14 @@ class VendorController extends ResourceController {
     }
     final vendors = await vendorQuery.fetch();
 
-    vendors.forEach((Vendor v) {
-      if (v.properties?.data != null) {
-        (v.properties.data as Map<String, dynamic>).removeWhere(
-            (String key, dynamic value) => key == 'image' || key == 'logo' || key == 'product');
-      }
-    });
+    if (slim == 'true') {
+      vendors.forEach((Vendor v) {
+        if (v.properties?.data != null) {
+          (v.properties.data as Map<String, dynamic>).removeWhere(
+              (String key, dynamic value) => key == 'image' || key == 'logo' || key == 'product');
+        }
+      });
+    }
 
     return Response.ok(vendors);
   }
