@@ -15,3 +15,4 @@
 | product       | product image for display on vendor page                      | Vendor                |
 | product_uid   | product uid under assets/ for display on vendor page          | Vendor                |
 | website       | URL of vendor's website                                       | Vendor                | 
+| disabled      | boolean flag to hide vendor in client list                    | Vendor                | 
