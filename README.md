@@ -1,5 +1,7 @@
 # coupons_backend
 
+Backend used in production since 2020!
+
 ## Dependencies
 
 - Postgresql >=9.8
@@ -35,14 +37,9 @@ Run `aqueduct serve` from this directory to run the application. For running wit
 
 To generate a SwaggerUI client, run `aqueduct document client`.
 
-## Running Application Tests
+## Running in production
 
-To run all tests for this application, run the following in this directory:
+A systemd service template can be found under scripts for production deployment. There is also a script to create OAuth testclients and a keygen to insert new coupon codes.
 
-```
-pub run test
-```
-
-The default configuration file used when testing is `config.src.yaml`. This file should be checked into version control. It also the template for configuration files used in deployment.
-
-ToDo: Add tests
+## API-Endpoints
+All routes are described in openapi.json . Not all responses are correctly described!
